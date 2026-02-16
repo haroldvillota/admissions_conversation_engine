@@ -10,3 +10,8 @@ endif
 dev:
 	@uv run langgraph dev
 
+test:
+	@PYTHONPATH=src uv run --with pytest pytest -q
+
+test-debug:
+	@PYTHONPATH=src uv run --with pytest pytest -vv

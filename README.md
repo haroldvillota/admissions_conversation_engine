@@ -150,13 +150,19 @@ docker run --rm -it -p 2024:2024 --env-file .env admissions-conversation-engine:
 
 El sistema usa variables con `__` para configuración anidada. Puedes usar `env-example` como plantilla.
 
-### Requeridas
+### Requeridas (según esquema actual)
 
-- `LLM__DEFAULT__API_KEY`
-- `LLM__DEFAULT__MODEL`
-- `LLM__TRANSLATOR__MODEL`
-- `CHECKPOINTER__DSN`
+- `RAG__VECTOR_STORE__KIND`
 - `RAG__VECTOR_STORE__DSN`
+- `RAG__VECTOR_STORE__COLLECTION`
+- `RAG__EMBEDDINGS__MODEL`
+- `LLM__DEFAULT__MODEL`
+- `LLM__DEFAULT__API_KEY`
+- `LLM__GUARDRAIL__MODEL`
+- `LLM__REACT__MODEL`
+- `LLM__TRANSLATOR__MODEL`
+- `CHECKPOINTER__KIND`
+- `CHECKPOINTER__DSN`
 - `TENANT__INSTITUTION`
 - `TENANT__TERMS_OF_SERVICE`
 - `TENANT__ALLOWED_TOPICS`
@@ -166,12 +172,21 @@ El sistema usa variables con `__` para configuración anidada. Puedes usar `env-
 
 ### Opcionales comunes
 
+- `RAG__VECTOR_STORE__TOP_K`
+- `RAG__EMBEDDINGS__PROVIDER`
+- `RAG__EMBEDDINGS__BATCH_SIZE`
+- `LLM__DEFAULT__PROVIDER`
 - `LLM__DEFAULT__TEMPERATURE`
-- `LLM__GUARDRAIL__MODEL`
-- `LLM__REACT__MODEL`
+- `LLM__GUARDRAIL__TEMPERATURE`
+- `LLM__REACT__TEMPERATURE`
 - `LLM__TRANSLATOR__TEMPERATURE`
+- `OBSERVABILITY__PROVIDER`
 - `OBSERVABILITY__PUBLIC_KEY`
 - `OBSERVABILITY__SECRET_KEY`
 - `OBSERVABILITY__BASE_URL`
+
+### Nota sobre fallback de LLM
+
+`config_bootstrap` completa `guardrail`, `react` y `translator` con valores de `llm.default` solo si esos campos vienen vacíos (`None` o `""`) una vez cargada la configuración.
 
 ---

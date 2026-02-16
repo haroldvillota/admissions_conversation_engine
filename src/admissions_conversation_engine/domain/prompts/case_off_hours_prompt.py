@@ -36,7 +36,7 @@ Guion del caso (off_hours):
 "Gracias por contactar con la {institution}."
 y luego continúa con:
 "Estimado {{user_name}},
-Te escribimos desde la {institution} en relación con tu petición de información sobre Turismo.
+Te escribimos desde la {institution} en relación con tu petición de información sobre el ingreso a la universidad.
 Actualmente estamos fuera de nuestro horario de atención comercial directa, pero estaré encantado de resolver tus primeras dudas hasta que un asesor pueda contactar contigo directamente.
 En este momento, ¿en qué puedo ayudarte?"
 

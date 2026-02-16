@@ -19,12 +19,23 @@ Esta decisión prioriza simplicidad y velocidad de desarrollo, asumiendo explíc
 
 ## 🧠 Estado Conversacional
 
-El graph trabaja sobre un **estado explícito y tipado**, que al inicio incluye:
+El graph trabaja sobre un **estado explícito y tipado** (`AgentState`) y un **contexto de runtime** (`ContextSchema`).
 
-* Historial de mensajes
-* Nombre del usuario
+### `AgentState` (estado del graph)
 
-Ejemplo conceptual:
+* `messages`: historial conversacional (acumulado con `add_messages`)
+* `language`: idioma detectado (`str | None`)
+* `language_confidence`: confianza de detección (`float | None`)
+* `guardrail_allowed`: bandera de seguridad (`bool`)
+* `guardrail_reason`: motivo (`OK | PROHIBITED_TOPIC | OUT_OF_SCOPE | INJECTION`)
+* `next_node`: siguiente nodo de enrutamiento (`str | None`)
+
+### `ContextSchema` (runtime.context)
+
+* `chat_id`: identificador de conversación
+* `channel_id`: canal de origen
+* `case`: caso de negocio (`off_hours | low_scoring | overflow | max_retries`)
+* `user_name`: nombre del usuario
 
 * El estado es **inmutable por contrato** (se retorna uno nuevo o actualizado).
 * Cada nodo **lee estado → decide → devuelve cambios**.

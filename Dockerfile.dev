@@ -1,0 +1,45 @@
+# --- Imagen Base ---
+# Usamos slim para un balance entre peso y herramientas necesarias
+FROM python:3.11-slim
+
+# --- Configuración de Entorno (Best Practices) ---
+# 1. PYTHONDONTWRITEBYTECODE: Evita que Python genere archivos .pyc en el contenedor
+# 2. PYTHONUNBUFFERED: Asegura que los logs de Python se impriman en tiempo real (vital para Docker logs)
+# 3. VIRTUAL_ENV: Definimos la ruta del entorno virtual para referencia de otras herramientas
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    VIRTUAL_ENV=/app/.venv
+
+# Inyectamos el binario del venv y uv en el PATH para ejecución directa
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+WORKDIR /app
+
+# --- Gestión de Dependencias con UV ---
+# Instalamos uv directamente desde la imagen oficial para máxima velocidad
+COPY --from=ghcr.io/astral-sh/uv:0.4.30 /uv /uvx /bin/
+
+# Copiamos archivos de definición de dependencias primero
+# Esto permite que Docker cachee la capa de librerías y no se reinstalen si solo cambias código
+COPY pyproject.toml uv.lock README.md ./
+
+# Instalamos dependencias externas omitiendo la instalación del código fuente local
+# --frozen: Asegura que instalamos exactamente lo que dice el lockfile
+# --no-install-project: Clave para evitar errores de compilación antes de copiar el src
+RUN uv sync --frozen --no-install-project
+
+# --- Inyección de Código ---
+# Copiamos la lógica de la aplicación
+COPY src ./src
+
+# Re-sincronizamos: Ahora que el código está presente, uv instala el proyecto
+# permitiendo que el script 'start' definido en pyproject.toml sea ejecutable
+RUN uv sync --frozen
+
+COPY langgraph.json ./
+
+# --- Ejecución ---
+# En desarrollo, usamos 'uv run' o el binario directo para facilitar hot-reloading 
+# o depuración interactiva si el entrypoint lo permite.
+CMD ["uv","run","langgraph","dev","--host","0.0.0.0","--no-browser"]

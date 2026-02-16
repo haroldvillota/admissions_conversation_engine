@@ -1,0 +1,39 @@
+RAG__VECTOR_STORE__KIND="postgresql"
+RAG__VECTOR_STORE__DSN="postgresql+psycopg://user:pass@host:5432/db" # Secret
+RAG__VECTOR_STORE__COLLECTION="rag_docs"
+RAG__VECTOR_STORE__TOP_K="4"
+
+RAG__EMBEDDINGS__PROVIDER="openai"
+RAG__EMBEDDINGS__MODEL="text-embedding-3-large"
+RAG__EMBEDDINGS__BATCH_SIZE="128"
+
+LLM__DEFAULT__PROVIDER="openai"
+LLM__DEFAULT__API_KEY="..." # Secret
+LLM__DEFAULT__MODEL="gpt-4o-mini"
+LLM__DEFAULT__TEMPERATURE="0.0"
+
+LLM__GUARDRAIL__MODEL="gpt-4.1-nano"
+LLM__GUARDRAIL__TEMPERATURE="0.0"
+
+LLM__REACT__MODEL="gpt-4.1-mini"
+LLM__REACT__TEMPERATURE="0.0"
+
+LLM__TRANSLATOR__MODEL="gpt-4.1-nano"
+LLM__TRANSLATOR__TEMPERATURE="0.0"
+
+CHECKPOINTER__KIND="postgresql"
+CHECKPOINTER__DSN="postgresql+psycopg://user:pass@host:5432/db" # Secret
+
+OBSERVABILITY__PROVIDER="langfuse" # Secret
+OBSERVABILITY__PUBLIC_KEY="..." # Secret
+OBSERVABILITY__SECRET_KEY="..." # Secret
+OBSERVABILITY__BASE_URL="https://cloud.langfuse.com"
+
+TENANT__INSTITUTION="Universidad Europea"
+TENANT__TERMS_OF_SERVICE="https://universidadeuropea.com/conocenos/normativa/"
+TENANT__ALLOWED_TOPICS="Información de carreras,Admisiones"
+TENANT__TONE="Siempre utiliza la segunda persona singular (\"tú\"), manteniendo un tono amigable, respetuoso y empático."
+TENANT__LANGUAGE_FALLBACK="en-US"
+TENANT__ALLOWED_LANGUAGES="es-ES,en-US"
+
+#LANGGRAPH_POSTGRES_POOL_MAX_SIZE

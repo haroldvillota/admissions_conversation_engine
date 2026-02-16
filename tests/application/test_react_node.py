@@ -32,3 +32,30 @@ def test_react_node_returns_ai_message_in_messages_key() -> None:
 
     assert len(result["messages"]) == 1
     assert result["messages"][0].content == "Respuesta del asistente"
+
+
+def test_react_node_uses_knowledge_tool_context() -> None:
+    captured = {"messages": None}
+
+    def fake_llm(inputs):
+        captured["messages"] = inputs.to_messages()
+        return AIMessage(content="Respuesta con contexto")
+
+    class FakeKnowledgeTool:
+        def search(self, query: str) -> str:
+            assert query == "Hola"
+            return "dato relevante"
+
+    node = ReactNode(
+        llm=RunnableLambda(fake_llm),
+        prompt="system prompt",
+        knowledge_tool=FakeKnowledgeTool(),
+    )
+    state = {"messages": [HumanMessage(content="Hola")]}
+
+    result = node(state=state, runtime=_runtime())  # type: ignore[arg-type]
+
+    assert result["messages"][0].content == "Respuesta con contexto"
+    assert captured["messages"] is not None
+    system_contents = [message.content for message in captured["messages"] if message.type == "system"]
+    assert any("dato relevante" in content for content in system_contents)

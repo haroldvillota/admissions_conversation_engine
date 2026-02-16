@@ -6,35 +6,23 @@ from admissions_conversation_engine.domain.agent_state import AgentState, Contex
 from dataclasses import asdict
 
 
-class ReactNode:
-    def __init__(self, llm: object, prompt: str, knowledge_tool: object | None = None) -> None:
+class SimpleLLMNode:
+    def __init__(self, llm: object, prompt: str) -> None:
         self._llm = llm
         self._prompt = prompt
-        self._knowledge_tool = knowledge_tool
 
     def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> AgentState:
-        user_message = state["messages"][-1].content if state.get("messages") else ""
-        retrieved_context = ""
-
-        if self._knowledge_tool is not None and user_message:
-            try:
-                retrieved_context = self._knowledge_tool.search(user_message)
-            except Exception:
-                retrieved_context = ""
 
         prompt_template = ChatPromptTemplate.from_messages([
             ("system", self._prompt),
-            (
-                "system",
-                "Contexto relevante de conocimiento interno para responder (usar solo si aplica):\n{retrieved_context}",
-            ),
             MessagesPlaceholder(variable_name="messages"),
         ])
         
         context_dict = asdict(runtime.context)
-        full_inputs = {**state, **context_dict, "retrieved_context": retrieved_context}
+        full_inputs = {**state, **context_dict}
 
         chain = prompt_template | self._llm
         response = chain.invoke(full_inputs)
         return {"messages": [response]}
         
+

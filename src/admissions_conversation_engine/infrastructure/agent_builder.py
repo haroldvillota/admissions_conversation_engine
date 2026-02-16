@@ -8,6 +8,10 @@ from admissions_conversation_engine.application.react_node import (
     ReactNode,
 )
 
+from admissions_conversation_engine.application.simple_llm_node import (
+    SimpleLLMNode,
+)
+
 from admissions_conversation_engine.application.setup_chat_node import (
     SetupChatNode,
 )
@@ -36,6 +40,7 @@ from admissions_conversation_engine.domain.prompts.case_off_hours_prompt import 
 from admissions_conversation_engine.domain.prompts.case_low_scoring_prompt import render_case_low_scoring_prompt
 from admissions_conversation_engine.domain.prompts.case_overflow_prompt import render_case_overflow_prompt
 from admissions_conversation_engine.domain.prompts.case_max_retries_prompt import render_case_max_retries_prompt
+from admissions_conversation_engine.infrastructure.rag_postgres_tool import PostgresVectorStoreTool
 
 @dataclass(frozen=True)
 class AgentBuilder:
@@ -48,6 +53,10 @@ class AgentBuilder:
             guardrail_llm = LLMFactory(self.app_config.llm.guardrail).build_llm()
             translator_llm = LLMFactory(self.app_config.llm.translator).build_llm()
             react_llm = LLMFactory(self.app_config.llm.react).build_llm()
+            knowledge_tool = PostgresVectorStoreTool(
+                rag_config=self.app_config.rag,
+                embeddings_api_key=self.app_config.llm.default.api_key,
+            )
 
             formatted_guardrail_prompt = render_guardrail_prompt(self.app_config.tenant)
             formatted_language_detector_prompt = render_language_detector_prompt(self.app_config.tenant)
@@ -63,10 +72,15 @@ class AgentBuilder:
             graph.add_node("guardrail", GuardrailNode(guardrail_llm, formatted_guardrail_prompt))
             graph.add_node("case_router", CaseRouterNode())
             
-            graph.add_node("off_hours_node", ReactNode(react_llm, formatted_off_hours_prompt))
-            graph.add_node("low_scoring_node", ReactNode(react_llm, formatted_low_scoring_prompt))
-            graph.add_node("overflow_node", ReactNode(react_llm, formatted_overflow_prompt))
-            graph.add_node("max_retries_node", ReactNode(react_llm, formatted_max_retries_prompt))
+            graph.add_node("off_hours_node", SimpleLLMNode(react_llm, formatted_off_hours_prompt))
+            graph.add_node("low_scoring_node", SimpleLLMNode(react_llm, formatted_low_scoring_prompt))
+            graph.add_node("overflow_node", SimpleLLMNode(react_llm, formatted_overflow_prompt))
+            graph.add_node("max_retries_node", SimpleLLMNode(react_llm, formatted_max_retries_prompt))
+
+            #graph.add_node("off_hours_node", ReactNode(react_llm, formatted_off_hours_prompt, knowledge_tool))
+            #graph.add_node("low_scoring_node", ReactNode(react_llm, formatted_low_scoring_prompt, knowledge_tool))
+            #graph.add_node("overflow_node", ReactNode(react_llm, formatted_overflow_prompt, knowledge_tool))
+            #graph.add_node("max_retries_node", ReactNode(react_llm, formatted_max_retries_prompt, knowledge_tool))
             
             graph.add_edge(START, "setup")
             graph.add_edge("setup", "language_detector")

@@ -11,13 +11,7 @@ class GuardrailNode:
         self._prompt = prompt
 
     def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> AgentState:
-        """
-        Ejecuta clasificación de seguridad.
-        - Si allowed=True -> solo setea flags y continúa.
-        - Si allowed=False -> responde al usuario y corta flujo (según tu graph).
-        """
-
-        # Último mensaje del usuario
+        
         user_message = state["messages"][-1].content if state.get("messages") else ""
 
         prompt_template = ChatPromptTemplate.from_messages([
@@ -35,7 +29,7 @@ class GuardrailNode:
         chain = prompt_template | self._llm
         response = chain.invoke(full_inputs)
 
-        # Parseo robusto de JSON
+        # Parseo de JSON
         try:
             parsed = json.loads(response.content)
         except Exception:
@@ -53,15 +47,12 @@ class GuardrailNode:
         safe_reply = parsed.get("safe_reply", "")
 
         if not allowed:
-            # Devuelve mensaje seguro y marca bloqueo
             return {
                 "guardrail_allowed": False,
                 "guardrail_reason": reason,
                 "messages": [AIMessage(content=safe_reply)],
             }
 
-        # Si está permitido, no agregamos mensaje,
-        # solo marcamos flag y dejamos que el graph continúe
         return {
             "guardrail_allowed": True,
             "guardrail_reason": "OK",

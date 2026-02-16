@@ -12,6 +12,11 @@ El código se organiza en **tres capas**, con dependencias siempre hacia el inte
 infraestructura  →  aplicación  →  dominio
 ```
 
+**Nota de diseño**
+
+Aunque se usa una arquitectura hexagonal simplificada, en este proyecto se permite de forma intencional el uso directo de componentes de **LangChain/LangGraph** en las capas de **dominio** y **aplicación**.  
+Esta decisión prioriza simplicidad y velocidad de desarrollo, asumiendo explícitamente el acoplamiento con el framework como parte del diseño.
+
 ## 🧠 Estado Conversacional
 
 El graph trabaja sobre un **estado explícito y tipado**, que al inicio incluye:

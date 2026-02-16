@@ -8,6 +8,10 @@ from admissions_conversation_engine.application.react_node import (
     ReactNode,
 )
 
+from admissions_conversation_engine.application.tool_node import (
+    ToolNode,
+)
+
 from admissions_conversation_engine.application.simple_llm_node import (
     SimpleLLMNode,
 )
@@ -53,6 +57,7 @@ class AgentBuilder:
             guardrail_llm = LLMFactory(self.app_config.llm.guardrail).build_llm()
             translator_llm = LLMFactory(self.app_config.llm.translator).build_llm()
             react_llm = LLMFactory(self.app_config.llm.react).build_llm()
+            
             knowledge_tool = PostgresVectorStoreTool(
                 rag_config=self.app_config.rag,
                 embeddings_api_key=self.app_config.llm.default.api_key,
@@ -72,16 +77,14 @@ class AgentBuilder:
             graph.add_node("guardrail", GuardrailNode(guardrail_llm, formatted_guardrail_prompt))
             graph.add_node("case_router", CaseRouterNode())
             
-            graph.add_node("off_hours_node", SimpleLLMNode(react_llm, formatted_off_hours_prompt))
+            #tool_model = react_llm.bind_tools([knowledge_tool])
+            graph.add_node("off_hours_node", ReactNode(react_llm, formatted_off_hours_prompt, knowledge_tool))
+            #graph.add_node("tools", ToolNode(tool_model, formatted_off_hours_prompt, knowledge_tool))
+
             graph.add_node("low_scoring_node", SimpleLLMNode(react_llm, formatted_low_scoring_prompt))
             graph.add_node("overflow_node", SimpleLLMNode(react_llm, formatted_overflow_prompt))
             graph.add_node("max_retries_node", SimpleLLMNode(react_llm, formatted_max_retries_prompt))
 
-            #graph.add_node("off_hours_node", ReactNode(react_llm, formatted_off_hours_prompt, knowledge_tool))
-            #graph.add_node("low_scoring_node", ReactNode(react_llm, formatted_low_scoring_prompt, knowledge_tool))
-            #graph.add_node("overflow_node", ReactNode(react_llm, formatted_overflow_prompt, knowledge_tool))
-            #graph.add_node("max_retries_node", ReactNode(react_llm, formatted_max_retries_prompt, knowledge_tool))
-            
             graph.add_edge(START, "setup")
             graph.add_edge("setup", "language_detector")
             graph.add_edge("language_detector", "guardrail")

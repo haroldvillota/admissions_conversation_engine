@@ -174,6 +174,7 @@ El sistema usa variables con `__` para configuración anidada. Puedes usar `env-
 
 - `RAG__VECTOR_STORE__TOP_K`
 - `RAG__EMBEDDINGS__PROVIDER`
+- `RAG__EMBEDDINGS__API_KEY`
 - `RAG__EMBEDDINGS__BATCH_SIZE`
 - `LLM__DEFAULT__PROVIDER`
 - `LLM__DEFAULT__TEMPERATURE`
@@ -188,5 +189,7 @@ El sistema usa variables con `__` para configuración anidada. Puedes usar `env-
 ### Nota sobre fallback de LLM
 
 `config_bootstrap` completa `guardrail`, `react` y `translator` con valores de `llm.default` solo si esos campos vienen vacíos (`None` o `""`) una vez cargada la configuración.
+
+Para embeddings, `rag.embeddings.api_key` es opcional. Si no se define, el `AgentBuilder` usa `llm.default.api_key` como fallback.
 
 ---

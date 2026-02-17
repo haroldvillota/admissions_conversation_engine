@@ -8,17 +8,11 @@ from langchain_postgres import PGVector
 from admissions_conversation_engine.infrastructure.config.app_config import RagConfig
 from langchain_core.tools import tool
 
-@dataclass
-class PostgresVectorStoreTool:
-    rag_config: RagConfig
-    embeddings_api_key: str | None
+from langchain_core.tools import BaseTool
 
-    def __post_init__(self) -> None:
-        self._vector_store: PGVector | None = None
-
-    @tool
-    def search(self, query: str) -> str:
-        """
+class PostgresVectorStoreTool(BaseTool):
+    name: str = "search_admissions"
+    description: str = """
         Busca información oficial y actualizada sobre procesos de admisiones
         en la base de conocimiento interna de la institución.
 
@@ -48,7 +42,27 @@ class PostgresVectorStoreTool:
         - Un texto con la información relevante encontrada.
         - Puede devolver un texto vacío si no hay resultados.
         """
-            
+
+    def __init__(
+        self,
+        rag_config: RagConfig,
+        embeddings_api_key: Optional[str] = None,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.rag_config = rag_config
+        self.embeddings_api_key = embeddings_api_key
+        self._vector_store: PGVector | None = None
+        
+    rag_config: RagConfig = None
+    embeddings_api_key: str = None
+
+    def __post_init__(self) -> None:
+        super().__init__()
+        self._vector_store: PGVector | None = None
+
+
+    def _run(self, query: str) -> str:
         if not query.strip():
             return ""
 
@@ -57,12 +71,15 @@ class PostgresVectorStoreTool:
             query=query,
             k=self.rag_config.vector_store.top_k,
         )
-
         if not documents:
             return ""
 
-        return "\n\n".join(document.page_content for document in documents if document.page_content)
+        return "\n\n".join(d.page_content for d in documents if d.page_content)
 
+    async def _arun(self, query: str) -> str:
+        # TODO
+        return self._run(query)
+    
     def _get_vector_store(self) -> PGVector:
         if self._vector_store is not None:
             return self._vector_store

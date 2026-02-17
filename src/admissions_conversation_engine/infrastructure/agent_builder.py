@@ -58,10 +58,13 @@ class AgentBuilder:
             translator_llm = LLMFactory(self.app_config.llm.translator).build_llm()
             react_llm = LLMFactory(self.app_config.llm.react).build_llm()
             
-            knowledge_tool = PostgresVectorStoreTool(
+            vector_store = PostgresVectorStoreTool(
                 rag_config=self.app_config.rag,
-                embeddings_api_key=self.app_config.llm.default.api_key,
+                embeddings_api_key=self.app_config.rag.embeddings.api_key
+                or self.app_config.llm.default.api_key,
             )
+
+            search_tool = vector_store.make_search_tool()
 
             formatted_guardrail_prompt = render_guardrail_prompt(self.app_config.tenant)
             formatted_language_detector_prompt = render_language_detector_prompt(self.app_config.tenant)
@@ -77,9 +80,9 @@ class AgentBuilder:
             graph.add_node("guardrail", GuardrailNode(guardrail_llm, formatted_guardrail_prompt))
             graph.add_node("case_router", CaseRouterNode())
             
-            #tool_model = react_llm.bind_tools([knowledge_tool])
-            graph.add_node("off_hours_node", ReactNode(react_llm, formatted_off_hours_prompt, knowledge_tool))
-            #graph.add_node("tools", ToolNode(tool_model, formatted_off_hours_prompt, knowledge_tool))
+            tool_model = react_llm.bind_tools([search_tool])
+            graph.add_node("off_hours_node", ReactNode(react_llm, formatted_off_hours_prompt, search_tool))
+            graph.add_node("tools", ToolNode(tool_model, formatted_off_hours_prompt, search_tool))
 
             graph.add_node("low_scoring_node", SimpleLLMNode(react_llm, formatted_low_scoring_prompt))
             graph.add_node("overflow_node", SimpleLLMNode(react_llm, formatted_overflow_prompt))
@@ -109,8 +112,38 @@ class AgentBuilder:
                     "END": END,
                 }
             )
+            def should_continue(state: AgentState):
+                messages = state["messages"]
+                last_message = messages[-1]
+                # If there is no function call, then we finish
+                if not last_message.tool_calls:
+                    return "end"
+                # Otherwise if there is, we continue
+                else:
+                    return "continue"
             
-            graph.add_edge("off_hours_node", END)
+            graph.add_conditional_edges(
+                # First, we define the start node. We use `agent`.
+                # This means these are the edges taken after the `agent` node is called.
+                "off_hours_node",
+                # Next, we pass in the function that will determine which node is called next.
+                should_continue,
+                # Finally we pass in a mapping.
+                # The keys are strings, and the values are other nodes.
+                # END is a special node marking that the graph should finish.
+                # What will happen is we will call `should_continue`, and then the output of that
+                # will be matched against the keys in this mapping.
+                # Based on which one it matches, that node will then be called.
+                {
+                    # If `tools`, then we call the tool node.
+                    "continue": "tools",
+                    # Otherwise we finish.
+                    "end": END,
+                },
+            )
+
+            graph.add_edge("off_hours_node", "agent")
+            #graph.add_edge("off_hours_node", END)
             graph.add_edge("low_scoring_node", END)
             graph.add_edge("overflow_node", END)
             graph.add_edge("max_retries_node", END)

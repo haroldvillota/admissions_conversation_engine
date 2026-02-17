@@ -19,6 +19,7 @@ class RagEmbeddingsConfig(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     provider: Literal["openai"] = "openai"
+    api_key: str | None = None
     model: str
     batch_size: int = 128
 

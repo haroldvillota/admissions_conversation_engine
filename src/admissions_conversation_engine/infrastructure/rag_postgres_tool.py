@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from typing import Optional
 
 from langchain_openai import OpenAIEmbeddings
 from langchain_postgres import PGVector
@@ -103,3 +103,13 @@ class PostgresVectorStoreTool(BaseTool):
             use_jsonb=True,
         )
         return self._vector_store
+
+    def search(self, query: str) -> str:
+        return self._run(query)
+
+    def make_search_tool(self):
+        @tool(name_or_callable=self.name, description=self.description)
+        def search_admissions(query: str) -> str:
+            return self.search(query)
+
+        return search_admissions

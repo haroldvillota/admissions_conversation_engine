@@ -93,12 +93,19 @@ def _app_config() -> AppConfig:
 
 
 def test_agent_builder_builds_graph_with_expected_nodes_and_compiles(monkeypatch) -> None:
+    class FakeLLM:
+        def __init__(self, model: str):
+            self.model = model
+
+        def bind_tools(self, _tools):
+            return self
+
     class FakeLLMFactory:
         def __init__(self, profile):
             self._profile = profile
 
         def build_llm(self):
-            return f"llm:{self._profile.model}"
+            return FakeLLM(self._profile.model)
 
     monkeypatch.setattr(
         "admissions_conversation_engine.infrastructure.agent_builder.StateGraph",
@@ -148,6 +155,7 @@ def test_agent_builder_builds_graph_with_expected_nodes_and_compiles(monkeypatch
         "guardrail",
         "case_router",
         "off_hours_node",
+        "tools",
         "low_scoring_node",
         "overflow_node",
         "max_retries_node",

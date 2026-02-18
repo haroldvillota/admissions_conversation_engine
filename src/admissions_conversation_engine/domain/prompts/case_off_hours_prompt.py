@@ -3,7 +3,8 @@ from admissions_conversation_engine.infrastructure.config.app_config import Tena
 def render_case_off_hours_prompt(config: TenantConfig) -> str:
     return OFF_HOURS_PROMPT.format(
         institution=config.institution,
-        tone=config.tone
+        tone=config.tone,
+        allowed_topics=config.allowed_topics,
     )
 
 OFF_HOURS_PROMPT = """
@@ -16,6 +17,7 @@ Estilo:
 - No inventes ni completes con suposiciones.
 
 Política de conocimiento (muy importante):
+- Solo cubres temas permitidos: {allowed_topics}.
 - Responde preguntas de admisiones SOLO si cuentas con información suficiente en la información interna proporcionada por el sistema.
 - Si la información interna está vacía o no contiene lo necesario para responder con seguridad, di amablemente que no puedes ayudar con esa pregunta.
 

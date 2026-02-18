@@ -59,9 +59,7 @@ class AgentBuilder:
             react_llm = LLMFactory(self.app_config.llm.react).build_llm()
             
             vector_store = PostgresVectorStoreTool(
-                rag_config=self.app_config.rag,
-                embeddings_api_key=self.app_config.rag.embeddings.api_key
-                or self.app_config.llm.default.api_key,
+                rag_config=self.app_config.rag
             )
 
             search_tool = vector_store.make_search_tool()
@@ -81,7 +79,7 @@ class AgentBuilder:
             graph.add_node("case_router", CaseRouterNode())
             
             tool_model = react_llm.bind_tools([search_tool])
-            graph.add_node("off_hours_node", ReactNode(react_llm, formatted_off_hours_prompt, search_tool))
+            graph.add_node("off_hours_node", ReactNode(tool_model, formatted_off_hours_prompt, search_tool))
             graph.add_node("tools", ToolNode(tool_model, formatted_off_hours_prompt, search_tool))
 
             graph.add_node("low_scoring_node", SimpleLLMNode(react_llm, formatted_low_scoring_prompt))
@@ -142,7 +140,7 @@ class AgentBuilder:
                 },
             )
 
-            graph.add_edge("off_hours_node", "agent")
+            graph.add_edge("tools", "off_hours_node")
             #graph.add_edge("off_hours_node", END)
             graph.add_edge("low_scoring_node", END)
             graph.add_edge("overflow_node", END)

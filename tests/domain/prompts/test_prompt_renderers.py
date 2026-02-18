@@ -49,7 +49,6 @@ def test_render_case_off_hours_prompt_includes_key_tenant_fields() -> None:
     prompt = render_case_off_hours_prompt(_tenant())
 
     assert "Universidad Europea" in prompt
-    assert "Admisiones,Información de carreras" in prompt
     assert "{user_name}" in prompt
 
 

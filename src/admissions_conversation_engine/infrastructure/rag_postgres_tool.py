@@ -6,6 +6,8 @@ from langchain_postgres import PGEngine, PGVectorStore
 
 from admissions_conversation_engine.infrastructure.config.app_config import RagConfig
 
+from typing import Optional
+from pydantic import Field
 
 class PostgresVectorStoreTool(BaseTool):
     name: str = "search_admissions"
@@ -13,14 +15,10 @@ class PostgresVectorStoreTool(BaseTool):
         "Busca información oficial y actualizada sobre procesos de admisiones "
         "en la base de conocimiento interna de la institución."
     )
-
-    def __init__(self, rag_config: RagConfig, **kwargs):
-        super().__init__(**kwargs)
-        self.rag_config = rag_config
-
-        self._engine: PGEngine | None = None
-        self._vector_store: PGVectorStore | None = None
-        self._vector_size: int | None = None  # cache para init de tabla
+    rag_config: RagConfig = Field(...)
+    _engine: Optional[PGEngine] = None
+    _vector_store: Optional[PGVectorStore] = None
+    _vector_size: Optional[int] = None
 
     def _run(self, query: str) -> str:
         if not query.strip():

@@ -15,3 +15,6 @@ test:
 
 test-debug:
 	@PYTHONPATH=src uv run --with pytest pytest -vv
+
+check:
+	uv run --with mypy mypy src

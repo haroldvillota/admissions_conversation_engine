@@ -58,11 +58,11 @@ class AgentBuilder:
             translator_llm = LLMFactory(self.app_config.llm.translator).build_llm()
             react_llm = LLMFactory(self.app_config.llm.react).build_llm()
             
-            vector_store = PostgresVectorStoreTool(
+            search_tool = PostgresVectorStoreTool(
                 rag_config=self.app_config.rag
             )
 
-            search_tool = vector_store.make_search_tool()
+            #search_tool = vector_store.make_search_tool()
 
             formatted_guardrail_prompt = render_guardrail_prompt(self.app_config.tenant)
             formatted_language_detector_prompt = render_language_detector_prompt(self.app_config.tenant)

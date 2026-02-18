@@ -28,6 +28,7 @@ def _valid_nested_raw_values() -> dict:
             },
             "embeddings": {
                 "provider": "openai",
+                "api_key": "embeddings-key",
                 "model": "text-embedding-3-large",
                 "batch_size": 128,
             },

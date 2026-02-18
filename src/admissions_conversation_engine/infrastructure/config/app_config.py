@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,7 +19,7 @@ class RagEmbeddingsConfig(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     provider: Literal["openai"] = "openai"
-    api_key: str | None = None
+    api_key: str = Field(min_length=1)
     model: str
     batch_size: int = 128
 

@@ -40,6 +40,7 @@ def _app_config() -> AppConfig:
                 },
                 "embeddings": {
                     "provider": "openai",
+                    "api_key": "embeddings-key",
                     "model": "text-embedding-3-large",
                     "batch_size": 128,
                 },

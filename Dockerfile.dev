@@ -1,6 +1,6 @@
 # --- Imagen Base ---
 # Usamos slim para un balance entre peso y herramientas necesarias
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 # --- Configuración de Entorno (Best Practices) ---
 # 1. PYTHONDONTWRITEBYTECODE: Evita que Python genere archivos .pyc en el contenedor

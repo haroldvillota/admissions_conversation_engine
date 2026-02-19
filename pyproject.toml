@@ -18,7 +18,6 @@ dependencies = [
     "langgraph-checkpoint>=4.0.0",
     "langgraph-checkpoint-postgres>=3.0.4",
     "langgraph-cli[inmem]>=0.4.12",
-    "psycopg2-binary>=2.9.9",
     "psycopg[binary]>=3.3.2",
     "pydantic-settings>=2.12.0",
     "python-dotenv>=1.2.1",

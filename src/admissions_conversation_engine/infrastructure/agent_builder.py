@@ -79,7 +79,8 @@ class AgentBuilder:
             graph.add_node("case_router", CaseRouterNode())
             
             tool_model = react_llm.bind_tools([search_tool])
-            graph.add_node("off_hours_node", ReactNode(tool_model, formatted_off_hours_prompt, search_tool))
+            #graph.add_node("off_hours_node", ReactNode(tool_model, formatted_off_hours_prompt, search_tool))
+            graph.add_node("off_hours_node", SimpleLLMNode(tool_model, formatted_off_hours_prompt))
             graph.add_node("tools", ToolNode(tool_model, formatted_off_hours_prompt, search_tool))
 
             graph.add_node("low_scoring_node", SimpleLLMNode(react_llm, formatted_low_scoring_prompt))

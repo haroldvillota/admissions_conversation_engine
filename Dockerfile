@@ -1,5 +1,5 @@
 # --- Etapa 1: Build (Instalación y Compilación) ---
-FROM python:3.11-slim AS builder
+FROM python:3.12-slim AS builder
 
 # Instalamos uv desde su imagen oficial (más rápido y seguro que pip)
 COPY --from=ghcr.io/astral-sh/uv:0.4.30 /uv /uvx /bin/
@@ -15,7 +15,7 @@ COPY src ./src
 RUN uv sync --frozen --no-dev
 
 # --- Etapa 2: Runtime (Imagen ligera para ejecución) ---
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 

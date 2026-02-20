@@ -128,6 +128,9 @@ Se incluyen dos Dockerfiles:
 
 - `Dockerfile`: imagen de producción (instala dependencias sin `dev`).
 - `Dockerfile.dev`: imagen de desarrollo (incluye dependencias `dev`).
+- `Dockerfile-langsmith`: imagen para `docker-compose-langsmith.yml`.
+
+Los Dockerfiles incluyen `alembic.ini` y el directorio `alembic/` para poder ejecutar migraciones dentro del contenedor.
 
 ### Build
 
@@ -143,6 +146,28 @@ docker build -t admissions-conversation-engine:dev -f Dockerfile.dev .
 docker run --rm -it -p 2024:2024 --env-file .env admissions-conversation-engine:dev
 
 ```
+
+## 🗄️ Migraciones con Alembic
+
+El proyecto incluye Alembic y la migración inicial:
+
+- `alembic/versions/e88610257584_create_vectorstore_view.py`
+
+### Ejecutar migraciones en local
+
+```bash
+make migrate
+```
+
+### Ejecutar migraciones en Docker Compose
+
+En `docker-compose-langsmith.yml` se agregó el servicio `langgraph-migrate`, que ejecuta:
+
+```bash
+alembic upgrade head
+```
+
+`langgraph-api` ahora depende de que `langgraph-migrate` termine correctamente antes de iniciar.
 
 ---
 

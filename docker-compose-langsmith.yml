@@ -41,6 +41,8 @@ services:
                 condition: service_healthy
             langgraph-postgres:
                 condition: service_healthy
+            langgraph-migrate:
+                condition: service_completed_successfully
         environment:
             REDIS_URI: redis://langgraph-redis:6379
             POSTGRES_URI: postgres://postgres:postgres@langgraph-postgres:5432/postgres?sslmode=disable
@@ -54,3 +56,14 @@ services:
         build:
             context: .
             dockerfile: Dockerfile-langsmith
+
+    langgraph-migrate:
+        depends_on:
+            langgraph-postgres:
+                condition: service_healthy
+        env_file:
+            - .env
+        build:
+            context: .
+            dockerfile: Dockerfile-langsmith
+        command: ["alembic", "upgrade", "head"]

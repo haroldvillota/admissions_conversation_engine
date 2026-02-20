@@ -9,6 +9,8 @@ WORKDIR /app
 # Copiamos solo los metadatos del proyecto para aprovechar la caché de capas
 COPY pyproject.toml uv.lock README.md ./
 COPY src ./src
+COPY alembic.ini ./alembic.ini
+COPY alembic ./alembic
 
 # Instalamos dependencias y el proyecto. 
 # --no-dev: Evita instalar librerías de test/linting en producción.
@@ -27,6 +29,8 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 # src: contiene el código fuente que el venv necesita para funcionar
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/src /app/src
+COPY --from=builder /app/alembic.ini /app/alembic.ini
+COPY --from=builder /app/alembic /app/alembic
 
 # Configuración de Python para contenedores
 ENV PATH="/app/.venv/bin:$PATH" \

@@ -20,4 +20,4 @@ check:
 	uv run --with mypy mypy src
 
 migrate:
-	alembic upgrade head
+	uv run alembic upgrade head

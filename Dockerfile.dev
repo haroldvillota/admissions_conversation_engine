@@ -32,6 +32,8 @@ RUN uv sync --frozen --no-install-project
 # --- Inyección de Código ---
 # Copiamos la lógica de la aplicación
 COPY src ./src
+COPY alembic.ini ./alembic.ini
+COPY alembic ./alembic
 
 # Re-sincronizamos: Ahora que el código está presente, uv instala el proyecto
 # permitiendo que el script 'start' definido en pyproject.toml sea ejecutable

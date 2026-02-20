@@ -18,3 +18,6 @@ test-debug:
 
 check:
 	uv run --with mypy mypy src
+
+migrate:
+	alembic upgrade head

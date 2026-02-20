@@ -18,7 +18,6 @@ class PostgresVectorStoreTool(BaseTool):
     rag_config: RagConfig = Field(...)
     _engine: Optional[PGEngine] = None
     _vector_store: Optional[PGVectorStore] = None
-    _vector_size: Optional[int] = None
 
     def _run(self, query: str) -> str:
         if not query.strip():
@@ -33,7 +32,7 @@ class PostgresVectorStoreTool(BaseTool):
         return "\n\n".join(d.page_content for d in docs if d.page_content)
 
     async def _arun(self, query: str) -> str:
-        # Si quieres async real: usa PGVectorStore.create(...) + ainit_vectorstore_table(...)
+        # TODO
         return self._run(query)
 
     def _get_vector_store(self) -> PGVectorStore:
@@ -58,34 +57,10 @@ class PostgresVectorStoreTool(BaseTool):
         engine = PGEngine.from_connection_string(url=self.rag_config.vector_store.dsn)
         self._engine = engine
 
-        vector_size = self._get_vector_size(embeddings)
-
-        # La responsabilidad de esto es rag ingest
-        #engine.init_vectorstore_table(
-        #    table_name=self.rag_config.vector_store.collection,
-        #    vector_size=vector_size,
-        #)
-
         self._vector_store = PGVectorStore.create_sync(
             engine=engine,
             table_name=self.rag_config.vector_store.collection,
-            embedding_service=embeddings,
-
-            #content_column="chunks.text_content",
-            #embedding_column="chunks.vector",
-            #metadata_columns="",
-            #id_column="embeddings.embedding_id",
-            #metadata_json_column="",
+            embedding_service=embeddings
         )
 
         return self._vector_store
-
-    def _get_vector_size(self, embeddings: OpenAIEmbeddings) -> int:
-        if self._vector_size is not None:
-            return self._vector_size
-
-        # Recomendación: idealmente añade vector_size a tu config para evitar esta llamada.
-        probe = embeddings.embed_query("vector_size_probe")
-        self._vector_size = len(probe)
-        print(f"self._vector_size:{self._vector_size}")# 1536
-        return self._vector_size

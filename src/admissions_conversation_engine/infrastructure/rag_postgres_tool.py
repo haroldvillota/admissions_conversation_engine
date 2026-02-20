@@ -26,7 +26,7 @@ class PostgresVectorStoreTool(BaseTool):
 
         store = self._get_vector_store()
         docs = store.similarity_search(query, k=self.rag_config.vector_store.top_k)
-
+        
         if not docs:
             return ""
 
@@ -60,15 +60,22 @@ class PostgresVectorStoreTool(BaseTool):
 
         vector_size = self._get_vector_size(embeddings)
 
-        engine.init_vectorstore_table(
-            table_name=self.rag_config.vector_store.collection,
-            vector_size=vector_size,
-        )
+        # La responsabilidad de esto es rag ingest
+        #engine.init_vectorstore_table(
+        #    table_name=self.rag_config.vector_store.collection,
+        #    vector_size=vector_size,
+        #)
 
         self._vector_store = PGVectorStore.create_sync(
             engine=engine,
             table_name=self.rag_config.vector_store.collection,
             embedding_service=embeddings,
+
+            #content_column="chunks.text_content",
+            #embedding_column="chunks.vector",
+            #metadata_columns="",
+            #id_column="embeddings.embedding_id",
+            #metadata_json_column="",
         )
 
         return self._vector_store
@@ -80,4 +87,5 @@ class PostgresVectorStoreTool(BaseTool):
         # Recomendación: idealmente añade vector_size a tu config para evitar esta llamada.
         probe = embeddings.embed_query("vector_size_probe")
         self._vector_size = len(probe)
+        print(f"self._vector_size:{self._vector_size}")# 1536
         return self._vector_size

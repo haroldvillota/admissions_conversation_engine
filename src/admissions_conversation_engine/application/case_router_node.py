@@ -1,9 +1,9 @@
 from langgraph.runtime import Runtime
 from admissions_conversation_engine.domain.agent_state import AgentState, ContextSchema
-from langgraph.graph import END
+
 
 class CaseRouterNode:
-    def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> str:
+    def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> AgentState:
         """
         Devuelve el nombre del siguiente nodo basado en runtime.context.case
         """

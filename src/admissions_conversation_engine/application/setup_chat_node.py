@@ -11,7 +11,6 @@ class SetupChatNode:
     def __call__(self, state: AgentState, config: RunnableConfig, runtime: Runtime[ContextSchema]) -> AgentState:
         chat_id = runtime.context.chat_id
         
-
         return state
         
 

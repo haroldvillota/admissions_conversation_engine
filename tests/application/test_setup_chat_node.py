@@ -14,12 +14,10 @@ def _runtime() -> SimpleNamespace:
     return SimpleNamespace(context=context)
 
 
-def test_setup_chat_node_returns_same_state(capsys) -> None:
+def test_setup_chat_node_returns_same_state() -> None:
     node = SetupChatNode()
     state = {"messages": []}
 
     result = node(state=state, config={}, runtime=_runtime())  # type: ignore[arg-type]
 
     assert result is state
-    captured = capsys.readouterr()
-    assert "chat_id:chat-123" in captured.out

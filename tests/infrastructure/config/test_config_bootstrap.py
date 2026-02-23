@@ -7,6 +7,9 @@ from admissions_conversation_engine.infrastructure.config.config_bootstrap impor
     AppConfigBootstrapper,
 )
 from admissions_conversation_engine.infrastructure.config.config_source import ConfigSource
+from admissions_conversation_engine.infrastructure.config.env_config_source import (
+    EnvironmentVariableConfigSource,
+)
 
 
 class StaticConfigSource(ConfigSource):
@@ -79,6 +82,17 @@ def _valid_nested_raw_values() -> dict:
         },
     }
 
+def _flatten_nested_to_env(values: dict, *, prefix: str = "") -> dict:
+    out: dict[str, str] = {}
+    for key, value in values.items():
+        composed = f"{prefix}__{key}" if prefix else str(key)
+        if isinstance(value, dict):
+            out.update(_flatten_nested_to_env(value, prefix=composed))
+        else:
+            # env vars come as strings; pydantic will coerce types as needed
+            out[composed.upper()] = "" if value is None else str(value)
+    return out
+
 
 def test_load_app_config_fills_missing_llm_values_from_default() -> None:
     bootstrapper = AppConfigBootstrapper(config_source=StaticConfigSource(_valid_nested_raw_values()))
@@ -89,6 +103,29 @@ def test_load_app_config_fills_missing_llm_values_from_default() -> None:
     assert app_config.llm.guardrail.model == "gpt-4.1-mini"
     assert app_config.llm.react.api_key == "default-key"
     assert app_config.llm.translator.model == "gpt-4.1-mini"
+
+def test_load_app_config_uses_llm_default_api_key_as_rag_embeddings_fallback_nested() -> None:
+    values = _valid_nested_raw_values()
+    del values["rag"]["embeddings"]["api_key"]
+    bootstrapper = AppConfigBootstrapper(config_source=StaticConfigSource(values))
+
+    app_config = bootstrapper.load_app_config()
+
+    assert app_config.rag.embeddings.api_key == "default-key"
+
+
+def test_load_app_config_uses_llm_default_api_key_as_rag_embeddings_fallback_env_form(monkeypatch) -> None:
+    env_values = _flatten_nested_to_env(_valid_nested_raw_values())
+    env_values.pop("RAG__EMBEDDINGS__API_KEY", None)
+
+    for key, value in env_values.items():
+        monkeypatch.setenv(key, value)
+    monkeypatch.delenv("RAG__EMBEDDINGS__API_KEY", raising=False)
+
+    bootstrapper = AppConfigBootstrapper(config_source=EnvironmentVariableConfigSource())
+    app_config = bootstrapper.load_app_config()
+
+    assert app_config.rag.embeddings.api_key == "default-key"
 
 
 def test_load_app_config_raises_runtime_error_for_invalid_config() -> None:

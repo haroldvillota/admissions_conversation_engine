@@ -18,12 +18,70 @@ class AppConfigBootstrapper:
     config_source: ConfigSource
 
     def load_app_config(self) -> AppConfig:
-        raw_values = self.config_source.load_configuration_values()
+        raw_values = dict(self.config_source.load_configuration_values())
+        raw_values = self._normalize_config_shape(raw_values)
+        raw_values = self._apply_rag_embeddings_api_key_fallback(raw_values)
         try:
             app_config = AppConfig.model_validate(raw_values)
             return self._fill_llm_profiles_from_default_config(app_config)
         except ValidationError as validation_error:
             raise RuntimeError(f"Invalid application configuration:\n{validation_error}") from validation_error
+
+    @staticmethod
+    def _normalize_config_shape(raw_values: dict[str, Any]) -> dict[str, Any]:
+        """
+        Config sources can return:
+        - nested dicts (tests, file-based sources)
+        - flat env-var style dicts (EnvironmentVariableConfigSource, Vault)
+
+        Normalize to the nested dict shape expected by AppConfig.
+        """
+
+        if any(top_key in raw_values for top_key in ("rag", "llm", "checkpointer", "observability", "tenant")):
+            return raw_values
+
+        if not any("__" in key for key in raw_values.keys()):
+            return raw_values
+
+        normalized: dict[str, Any] = {}
+        for key, value in raw_values.items():
+            if "__" not in key:
+                continue
+            parts = key.split("__")
+            cursor: dict[str, Any] = normalized
+            for part in parts[:-1]:
+                part_key = part.lower()
+                existing = cursor.get(part_key)
+                if not isinstance(existing, dict):
+                    cursor[part_key] = {}
+                cursor = cursor[part_key]
+            cursor[parts[-1].lower()] = value
+
+        return normalized
+
+    @staticmethod
+    def _apply_rag_embeddings_api_key_fallback(raw_values: dict[str, Any]) -> dict[str, Any]:
+        """
+        README: RAG__EMBEDDINGS__API_KEY is optional.
+        If it's missing/blank, fallback to LLM__DEFAULT__API_KEY.
+
+        This is applied at bootstrap time so the rest of the system only sees a fully
+        resolved AppConfig.
+        """
+
+        llm_default_api_key = (
+            raw_values.get("llm", {}).get("default", {}).get("api_key")  # type: ignore[union-attr]
+        )
+        rag_embeddings = raw_values.get("rag", {}).get("embeddings", {})  # type: ignore[union-attr]
+
+        if (
+            isinstance(rag_embeddings, dict)
+            and rag_embeddings.get("api_key") in (None, "")
+            and llm_default_api_key not in (None, "")
+        ):
+            rag_embeddings["api_key"] = llm_default_api_key
+
+        return raw_values
 
     @staticmethod
     def _fill_llm_profiles_from_default_config(app_config: AppConfig) -> AppConfig:
@@ -58,6 +116,7 @@ def get_app_config(*, use_vault: bool, vault_path: str) -> AppConfig:
 
     secret_override_keys = [
         "RAG__VECTOR_STORE__DSN",
+        "RAG__EMBEDDINGS__API_KEY",
         "CHECKPOINTER__DSN",
         "LLM__DEFAULT__API_KEY",
         "OBSERVABILITY__PUBLIC_KEY",

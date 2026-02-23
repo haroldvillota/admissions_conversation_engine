@@ -43,6 +43,12 @@ def test_rag_postgres_tool_returns_joined_page_content(monkeypatch) -> None:
         def init_vectorstore_table(self, table_name: str, vector_size: int):
             self.init_calls.append((table_name, vector_size))
 
+    class FakePGVectorStore:
+        """Simula PGVectorStore.create_sync para que llame init_vectorstore_table del engine."""
+
+        def __init__(self, engine: FakeEngine, table_name: str, embedding_service: object):
+            engine.init_vectorstore_table(table_name, 3)
+
     class FakeVectorStore:
         def similarity_search(self, query: str, k: int):
             assert query == "admisiones"
@@ -60,9 +66,13 @@ def test_rag_postgres_tool_returns_joined_page_content(monkeypatch) -> None:
         "admissions_conversation_engine.infrastructure.rag_postgres_tool.PGEngine.from_connection_string",
         lambda url: fake_engine,
     )
+    def fake_create_sync(*, engine, table_name: str, embedding_service: object, **kwargs):
+        FakePGVectorStore(engine, table_name, embedding_service)
+        return fake_store
+
     monkeypatch.setattr(
         "admissions_conversation_engine.infrastructure.rag_postgres_tool.PGVectorStore.create_sync",
-        lambda **kwargs: fake_store,
+        fake_create_sync,
     )
 
     tool = PostgresVectorStoreTool(rag_config=_rag_config())

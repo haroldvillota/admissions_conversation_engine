@@ -3,7 +3,7 @@ from typing import List
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.runtime import Runtime
 from admissions_conversation_engine.domain.agent_state import AgentState, ContextSchema
-from admissions_conversation_engine.infrastructure.config.app_config import TenantConfig
+from admissions_conversation_engine.domain.tenant_config import TenantConfig
 
 
 class LlmLanguageDetectorNode:

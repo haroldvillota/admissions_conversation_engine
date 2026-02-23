@@ -17,7 +17,7 @@ from admissions_conversation_engine.domain.prompts.language_detector_prompt impo
     render_language_detector_prompt,
 )
 from admissions_conversation_engine.domain.prompts.react_prompt import render_react_prompt
-from admissions_conversation_engine.infrastructure.config.app_config import TenantConfig
+from admissions_conversation_engine.domain.tenant_config import TenantConfig
 
 
 def _tenant() -> TenantConfig:

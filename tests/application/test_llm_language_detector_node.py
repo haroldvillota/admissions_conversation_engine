@@ -7,7 +7,7 @@ from admissions_conversation_engine.application.llm_language_detector_node impor
     LlmLanguageDetectorNode,
 )
 from admissions_conversation_engine.domain.agent_state import ContextSchema
-from admissions_conversation_engine.infrastructure.config.app_config import TenantConfig
+from admissions_conversation_engine.domain.tenant_config import TenantConfig
 
 
 def _runtime() -> SimpleNamespace:

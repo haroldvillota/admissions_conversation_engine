@@ -5,6 +5,8 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from admissions_conversation_engine.domain.tenant_config import TenantConfig
+
 
 class RagVectorStoreConfig(BaseModel):
     model_config = ConfigDict(frozen=True)
@@ -63,17 +65,6 @@ class ObservabilityConfig(BaseModel):
     public_key: str | None = None
     secret_key: str | None = None
     base_url: str | None = None
-
-
-class TenantConfig(BaseModel):
-    model_config = ConfigDict(frozen=True)
-
-    institution: str
-    terms_of_service: str
-    allowed_topics: str
-    tone: str
-    language_fallback: str
-    allowed_languages: str
 
 
 class AppConfig(BaseSettings):

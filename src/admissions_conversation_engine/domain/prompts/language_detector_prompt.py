@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from admissions_conversation_engine.infrastructure.config.app_config import TenantConfig
+from admissions_conversation_engine.domain.tenant_config import TenantConfig
 
 
 def render_language_detector_prompt(config: TenantConfig) -> str:

@@ -1,4 +1,4 @@
-from admissions_conversation_engine.infrastructure.config.app_config import TenantConfig
+from admissions_conversation_engine.domain.tenant_config import TenantConfig
 
 def render_case_overflow_prompt(config: TenantConfig) -> str:
     return OVERFLOW_PROMPT.format(

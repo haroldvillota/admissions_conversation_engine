@@ -107,7 +107,7 @@ class AgentBuilder:
 
         graph.add_conditional_edges(
             "case_router",
-            lambda state: state.get("next_node"),
+            lambda state: state.get("case_node"),
             {
                 "off_hours_node": "off_hours_node",
                 "low_scoring_node": "low_scoring_node",

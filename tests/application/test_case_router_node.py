@@ -21,7 +21,7 @@ async def test_case_router_maps_known_case_to_node() -> None:
 
     result = await node(state={}, runtime=_runtime_with_case("overflow"))  # type: ignore[arg-type]
 
-    assert result == {"next_node": "overflow_node"}
+    assert result == {"case_node": "overflow_node"}
 
 
 @pytest.mark.asyncio
@@ -30,4 +30,4 @@ async def test_case_router_returns_end_for_unknown_case() -> None:
 
     result = await node(state={}, runtime=_runtime_with_case("unknown_case"))  # type: ignore[arg-type]
 
-    assert result == {"next_node": "END"}
+    assert result == {"case_node": "END"}

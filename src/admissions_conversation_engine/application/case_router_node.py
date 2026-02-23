@@ -7,7 +7,6 @@ class CaseRouterNode:
         """
         Devuelve el nombre del siguiente nodo basado en runtime.context.case
         """
-        case = runtime.context.case
 
         mapping = {
             "off_hours": "off_hours_node",
@@ -16,5 +15,5 @@ class CaseRouterNode:
             "max_retries": "max_retries_node",
         }
 
-        next_node = mapping.get(runtime.context.case, "END")
-        return {"next_node": next_node}
+        case_node = mapping.get(runtime.context.case, "END")
+        return {"case_node": case_node}

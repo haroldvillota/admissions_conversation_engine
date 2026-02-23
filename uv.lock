@@ -7,6 +7,7 @@ name = "admissions-conversation-engine"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "alembic" },
     { name = "langchain" },
     { name = "langchain-community" },
     { name = "langchain-openai" },
@@ -23,13 +24,9 @@ dependencies = [
     { name = "typing-extensions" },
 ]
 
-[package.dev-dependencies]
-dev = [
-    { name = "alembic" },
-]
-
 [package.metadata]
 requires-dist = [
+    { name = "alembic", specifier = ">=1.18.4" },
     { name = "langchain", specifier = ">=1.2.7" },
     { name = "langchain-community", specifier = ">=0.4.1" },
     { name = "langchain-openai", specifier = ">=1.1.7" },
@@ -47,7 +44,7 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "alembic", specifier = ">=1.18.4" }]
+dev = []
 
 [[package]]
 name = "aiohappyeyeballs"

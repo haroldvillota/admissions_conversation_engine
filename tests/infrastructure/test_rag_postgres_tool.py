@@ -46,17 +46,25 @@ def test_rag_postgres_tool_returns_joined_page_content(monkeypatch) -> None:
     class FakePGVectorStore:
         """Simula PGVectorStore.create_sync para que llame init_vectorstore_table del engine."""
 
-        def __init__(self, engine: FakeEngine, table_name: str, embedding_service: object):
-            engine.init_vectorstore_table(table_name, 3)
+        def __init__(
+            self,
+            engine: FakeEngine,
+            table_name: str,
+            embedding_service: FakeEmbeddings,
+            **_: object,
+        ):
+            # Emula el flujo real de PGVectorStore.create_sync:
+            # usa el servicio de embeddings para sondear el tamaño del vector
+            # y luego inicializa la tabla en el engine con ese tamaño.
+            vector = embedding_service.embed_query("vector_size_probe")
+            engine.init_vectorstore_table(table_name, len(vector))
 
-    class FakeVectorStore:
         def similarity_search(self, query: str, k: int):
             assert query == "admisiones"
             assert k == 2
             return [FakeDoc("doc 1"), FakeDoc("doc 2")]
 
     fake_engine = FakeEngine()
-    fake_store = FakeVectorStore()
 
     monkeypatch.setattr(
         "admissions_conversation_engine.infrastructure.rag_postgres_tool.OpenAIEmbeddings",
@@ -67,8 +75,8 @@ def test_rag_postgres_tool_returns_joined_page_content(monkeypatch) -> None:
         lambda url: fake_engine,
     )
     def fake_create_sync(*, engine, table_name: str, embedding_service: object, **kwargs):
-        FakePGVectorStore(engine, table_name, embedding_service)
-        return fake_store
+        # Devuelve una instancia de FakePGVectorStore que imita a PGVectorStore real.
+        return FakePGVectorStore(engine, table_name, embedding_service, **kwargs)
 
     monkeypatch.setattr(
         "admissions_conversation_engine.infrastructure.rag_postgres_tool.PGVectorStore.create_sync",

@@ -3,6 +3,8 @@ from admissions_conversation_engine.infrastructure.rag_postgres_tool import (
     PostgresVectorStoreTool,
 )
 
+import pytest
+
 
 def _rag_config() -> RagConfig:
     return RagConfig.model_validate(
@@ -86,6 +88,64 @@ def test_rag_postgres_tool_returns_joined_page_content(monkeypatch) -> None:
     tool = PostgresVectorStoreTool(rag_config=_rag_config())
 
     result = tool._run("admisiones")
+
+    assert result == "doc 1\n\ndoc 2"
+    assert fake_engine.init_calls == [("rag_docs", 3)]
+
+
+@pytest.mark.asyncio
+async def test_rag_postgres_tool_arun_returns_joined_page_content(monkeypatch) -> None:
+    class FakeDoc:
+        def __init__(self, page_content: str):
+            self.page_content = page_content
+
+    class FakeEmbeddings:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+        def embed_query(self, query: str):
+            assert query == "vector_size_probe"
+            return [0.1, 0.2, 0.3]
+
+    class FakeEngine:
+        def __init__(self):
+            self.init_calls = []
+
+        def init_vectorstore_table(self, table_name: str, vector_size: int):
+            self.init_calls.append((table_name, vector_size))
+
+    class FakePGVectorStore:
+        def __init__(self, engine: FakeEngine, table_name: str, embedding_service: FakeEmbeddings, **_: object):
+            vector = embedding_service.embed_query("vector_size_probe")
+            engine.init_vectorstore_table(table_name, len(vector))
+
+        def similarity_search(self, query: str, k: int):
+            assert query == "admisiones"
+            assert k == 2
+            return [FakeDoc("doc 1"), FakeDoc("doc 2")]
+
+    fake_engine = FakeEngine()
+
+    monkeypatch.setattr(
+        "admissions_conversation_engine.infrastructure.rag_postgres_tool.OpenAIEmbeddings",
+        FakeEmbeddings,
+    )
+    monkeypatch.setattr(
+        "admissions_conversation_engine.infrastructure.rag_postgres_tool.PGEngine.from_connection_string",
+        lambda url: fake_engine,
+    )
+
+    def fake_create_sync(*, engine, table_name: str, embedding_service: object, **kwargs):
+        return FakePGVectorStore(engine, table_name, embedding_service, **kwargs)
+
+    monkeypatch.setattr(
+        "admissions_conversation_engine.infrastructure.rag_postgres_tool.PGVectorStore.create_sync",
+        fake_create_sync,
+    )
+
+    tool = PostgresVectorStoreTool(rag_config=_rag_config())
+
+    result = await tool._arun("admisiones")
 
     assert result == "doc 1\n\ndoc 2"
     assert fake_engine.init_calls == [("rag_docs", 3)]

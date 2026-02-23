@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 
+import pytest
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.runnables import RunnableLambda
 
@@ -21,20 +22,22 @@ def _llm_with_content(content: str) -> RunnableLambda:
     return RunnableLambda(lambda _: AIMessage(content=content))
 
 
-def test_react_node_returns_ai_message_in_messages_key() -> None:
+@pytest.mark.asyncio
+async def test_react_node_returns_ai_message_in_messages_key() -> None:
     node = ReactNode(
         llm=_llm_with_content("Respuesta del asistente"),
         prompt="system prompt",
     )
     state = {"messages": [HumanMessage(content="Hola")]}
 
-    result = node(state=state, runtime=_runtime())  # type: ignore[arg-type]
+    result = await node(state=state, runtime=_runtime())  # type: ignore[arg-type]
 
     assert len(result["messages"]) == 1
     assert result["messages"][0].content == "Respuesta del asistente"
 
 
-def test_react_node_uses_knowledge_tool_context() -> None:
+@pytest.mark.asyncio
+async def test_react_node_uses_knowledge_tool_context() -> None:
     captured = {"messages": None}
 
     def fake_llm(inputs):
@@ -53,7 +56,7 @@ def test_react_node_uses_knowledge_tool_context() -> None:
     )
     state = {"messages": [HumanMessage(content="Hola")]}
 
-    result = node(state=state, runtime=_runtime())  # type: ignore[arg-type]
+    result = await node(state=state, runtime=_runtime())  # type: ignore[arg-type]
 
     assert result["messages"][0].content == "Respuesta con contexto"
     assert captured["messages"] is not None

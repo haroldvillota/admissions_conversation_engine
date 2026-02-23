@@ -10,7 +10,7 @@ class GuardrailNode:
         self._llm = llm
         self._prompt = prompt
 
-    def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> AgentState:
+    async def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> AgentState:
         
         user_message = state["messages"][-1].content if state.get("messages") else ""
 
@@ -27,7 +27,7 @@ class GuardrailNode:
         }
 
         chain = prompt_template | self._llm
-        response = chain.invoke(full_inputs)
+        response = await chain.ainvoke(full_inputs)
 
         # Parseo de JSON
         try:

@@ -14,14 +14,14 @@ class ToolNode:
         self._prompt = prompt
         self._knowledge_tool = knowledge_tool
 
-    def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> AgentState:
+    async def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> AgentState:
         tools = [self._knowledge_tool]
         tools_by_name = {tool.name: tool for tool in tools}
 
         outputs = []
         
         for tool_call in state["messages"][-1].tool_calls:
-            tool_result = tools_by_name[tool_call["name"]].invoke(tool_call["args"])
+            tool_result = await tools_by_name[tool_call["name"]].ainvoke(tool_call["args"])
             outputs.append(
                 ToolMessage(
                     content=json.dumps(tool_result),

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langgraph.runtime import Runtime
 from admissions_conversation_engine.domain.agent_state import AgentState, ContextSchema
@@ -12,13 +13,15 @@ class ReactNode:
         self._prompt = prompt
         self._knowledge_tool = knowledge_tool
 
-    def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> AgentState:
+    async def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> AgentState:
         user_message = state["messages"][-1].content if state.get("messages") else ""
         retrieved_context = ""
 
         if self._knowledge_tool is not None and user_message:
             try:
-                retrieved_context = self._knowledge_tool.search(user_message)
+                # ASYNC-LIMITATION: knowledge_tool.search es síncrono (no API async estándar).
+                # Usamos to_thread para evitar bloquear el event loop bajo alta concurrencia.
+                retrieved_context = await asyncio.to_thread(self._knowledge_tool.search, user_message)
             except Exception:
                 retrieved_context = ""
 
@@ -35,6 +38,6 @@ class ReactNode:
         full_inputs = {**state, **context_dict, "retrieved_context": retrieved_context}
 
         chain = prompt_template | self._llm
-        response = chain.invoke(full_inputs)
+        response = await chain.ainvoke(full_inputs)
         return {"messages": [response]}
         

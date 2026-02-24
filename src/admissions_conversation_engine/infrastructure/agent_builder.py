@@ -153,7 +153,16 @@ class AgentBuilder:
             },
         )
 
-        graph.add_edge("tools", END)
+        graph.add_conditional_edges(
+            "tools",
+            lambda state: state.get("case_node"),
+            {
+                "off_hours_node": "off_hours_node",
+                "low_scoring_node": "low_scoring_node",
+                "overflow_node": "overflow_node",
+                "max_retries_node": "max_retries_node",
+            }
+        )
 
         return graph.compile(
             checkpointer=self.checkpointer,

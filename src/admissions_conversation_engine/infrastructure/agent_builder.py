@@ -96,28 +96,47 @@ class AgentBuilder:
         if self.langfuse_client is not None:
             guardrail_prompt = self.langfuse_client.get_prompt("guardrail")
             language_detector_prompt = self.langfuse_client.get_prompt("language_detector")
+            off_hours_prompt = self.langfuse_client.get_prompt("off_hours")
+            low_scoring_prompt = self.langfuse_client.get_prompt("low_scoring")
+            overflow_prompt = self.langfuse_client.get_prompt("overflow")
+            max_retries_prompt = self.langfuse_client.get_prompt("max_retries")
             formatted_guardrail_prompt = render_guardrail_prompt(
                 guardrail_prompt.prompt, self.app_config.tenant
             )
-            formatted_language_detector_prompt = render_language_detector_prompt(language_detector_prompt.prompt, self.app_config.tenant)
+            formatted_language_detector_prompt = render_language_detector_prompt(
+                language_detector_prompt.prompt, self.app_config.tenant
+            )
+            formatted_off_hours_prompt = render_case_off_hours_prompt(
+                off_hours_prompt.prompt, self.app_config.tenant
+            )
+            formatted_low_scoring_prompt = render_case_low_scoring_prompt(
+                low_scoring_prompt.prompt, self.app_config.tenant
+            )
+            formatted_overflow_prompt = render_case_overflow_prompt(
+                overflow_prompt.prompt, self.app_config.tenant
+            )
+            formatted_max_retries_prompt = render_case_max_retries_prompt(
+                max_retries_prompt.prompt, self.app_config.tenant
+            )
         else:
             formatted_guardrail_prompt = render_guardrail_prompt(
                 GUARDRAIL_PROMPT, self.app_config.tenant
             )
-            formatted_language_detector_prompt = render_language_detector_prompt(LANGUAGE_DETECTOR_PROMPT, self.app_config.tenant)
-
-        formatted_off_hours_prompt = render_case_off_hours_prompt(
-            OFF_HOURS_PROMPT, self.app_config.tenant
-        )
-        formatted_low_scoring_prompt = render_case_low_scoring_prompt(
-            LOW_SCORING_PROMPT, self.app_config.tenant
-        )
-        formatted_overflow_prompt = render_case_overflow_prompt(
-            OVERFLOW_PROMPT, self.app_config.tenant
-        )
-        formatted_max_retries_prompt = render_case_max_retries_prompt(
-            MAX_RETRIES_PROMPT, self.app_config.tenant
-        )
+            formatted_language_detector_prompt = render_language_detector_prompt(
+                LANGUAGE_DETECTOR_PROMPT, self.app_config.tenant
+            )
+            formatted_off_hours_prompt = render_case_off_hours_prompt(
+                OFF_HOURS_PROMPT, self.app_config.tenant
+            )
+            formatted_low_scoring_prompt = render_case_low_scoring_prompt(
+                LOW_SCORING_PROMPT, self.app_config.tenant
+            )
+            formatted_overflow_prompt = render_case_overflow_prompt(
+                OVERFLOW_PROMPT, self.app_config.tenant
+            )
+            formatted_max_retries_prompt = render_case_max_retries_prompt(
+                MAX_RETRIES_PROMPT, self.app_config.tenant
+            )
 
         graph = StateGraph(AgentState, context_schema=ContextSchema)
         

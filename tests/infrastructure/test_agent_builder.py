@@ -167,3 +167,79 @@ def test_agent_builder_builds_graph_with_expected_nodes_and_compiles(monkeypatch
     }
     assert ("setup", "language_detector") in graph.edges
     assert ("language_detector", "guardrail") in graph.edges
+
+
+def test_agent_builder_fetches_all_prompts_from_langfuse(monkeypatch) -> None:
+    class FakeLLM:
+        def bind_tools(self, _tools):
+            return self
+
+    class FakeLLMFactory:
+        def __init__(self, profile):
+            pass
+
+        def build_llm(self):
+            return FakeLLM()
+
+    class FakeLangfusePrompt:
+        def __init__(self, name):
+            self.prompt = f"{name}-from-langfuse"
+
+    class FakeLangfuse:
+        def __init__(self):
+            self.fetched = []
+
+        def get_prompt(self, name):
+            self.fetched.append(name)
+            return FakeLangfusePrompt(name)
+
+    monkeypatch.setattr(
+        "admissions_conversation_engine.infrastructure.agent_builder.StateGraph",
+        FakeStateGraph,
+    )
+    monkeypatch.setattr(
+        "admissions_conversation_engine.infrastructure.agent_builder.LLMFactory",
+        FakeLLMFactory,
+    )
+    monkeypatch.setattr(
+        "admissions_conversation_engine.infrastructure.agent_builder.render_guardrail_prompt",
+        lambda *_: "guardrail-prompt",
+    )
+    monkeypatch.setattr(
+        "admissions_conversation_engine.infrastructure.agent_builder.render_language_detector_prompt",
+        lambda *_: "language-detector-prompt",
+    )
+    monkeypatch.setattr(
+        "admissions_conversation_engine.infrastructure.agent_builder.render_case_off_hours_prompt",
+        lambda *_: "off-hours-prompt",
+    )
+    monkeypatch.setattr(
+        "admissions_conversation_engine.infrastructure.agent_builder.render_case_low_scoring_prompt",
+        lambda *_: "low-scoring-prompt",
+    )
+    monkeypatch.setattr(
+        "admissions_conversation_engine.infrastructure.agent_builder.render_case_overflow_prompt",
+        lambda *_: "overflow-prompt",
+    )
+    monkeypatch.setattr(
+        "admissions_conversation_engine.infrastructure.agent_builder.render_case_max_retries_prompt",
+        lambda *_: "max-retries-prompt",
+    )
+
+    langfuse_client = FakeLangfuse()
+    builder = AgentBuilder(
+        app_config=_app_config(),
+        checkpointer=object(),
+        langfuse_client=langfuse_client,
+    )
+
+    builder.build()
+
+    assert set(langfuse_client.fetched) == {
+        "guardrail",
+        "language_detector",
+        "off_hours",
+        "low_scoring",
+        "overflow",
+        "max_retries",
+    }

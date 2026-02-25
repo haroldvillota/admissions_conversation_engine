@@ -13,3 +13,6 @@ wheels/
 .env
 
 .langgraph_api/
+
+# Claude Code local config
+.claude/

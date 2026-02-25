@@ -62,12 +62,6 @@ class AgentBuilder:
         llm_with_tool = llm.bind_tools([search_tool])
 
         prompts = PromptProvider(self.langfuse_client, self.app_config.tenant).get_formatted_prompts()
-        formatted_guardrail_prompt = prompts.guardrail
-        formatted_language_detector_prompt = prompts.language_detector
-        formatted_off_hours_prompt = prompts.off_hours
-        formatted_low_scoring_prompt = prompts.low_scoring
-        formatted_overflow_prompt = prompts.overflow
-        formatted_max_retries_prompt = prompts.max_retries
 
         graph = StateGraph(AgentState, context_schema=ContextSchema)
         
@@ -76,17 +70,17 @@ class AgentBuilder:
             "language_detector",
             LlmLanguageDetectorNode(
                 translator_llm,
-                formatted_language_detector_prompt,
+                prompts.language_detector,
                 self.app_config.tenant,
             ),
         )
-        graph.add_node("guardrail", GuardrailNode(guardrail_llm, formatted_guardrail_prompt))
+        graph.add_node("guardrail", GuardrailNode(guardrail_llm, prompts.guardrail))
         graph.add_node("case_router", CaseRouterNode())
 
-        graph.add_node("off_hours_node", SimpleLLMNode(llm_with_tool, formatted_off_hours_prompt))
-        graph.add_node("low_scoring_node", SimpleLLMNode(llm_with_tool, formatted_low_scoring_prompt))
-        graph.add_node("overflow_node", SimpleLLMNode(llm_with_tool, formatted_overflow_prompt))
-        graph.add_node("max_retries_node", SimpleLLMNode(llm_with_tool, formatted_max_retries_prompt))
+        graph.add_node("off_hours_node", SimpleLLMNode(llm_with_tool, prompts.off_hours))
+        graph.add_node("low_scoring_node", SimpleLLMNode(llm_with_tool, prompts.low_scoring))
+        graph.add_node("overflow_node", SimpleLLMNode(llm_with_tool, prompts.overflow))
+        graph.add_node("max_retries_node", SimpleLLMNode(llm_with_tool, prompts.max_retries))
 
         graph.add_node("tools", ToolNode(llm_with_tool, search_tool))
 

@@ -13,8 +13,11 @@ from admissions_conversation_engine.domain.prompts.case_overflow_prompt import (
 from admissions_conversation_engine.domain.prompts.guardrail_prompt import (
     render_guardrail_prompt,
 )
-from admissions_conversation_engine.domain.prompts.language_detector_prompt import (
+from admissions_conversation_engine.domain.prompts.render_language_detector_prompt import (
     render_language_detector_prompt,
+)
+from admissions_conversation_engine.domain.prompts.language_detector_prompt import (
+    LANGUAGE_DETECTOR_PROMPT,
 )
 from admissions_conversation_engine.domain.prompts.react_prompt import render_react_prompt
 from admissions_conversation_engine.domain.tenant_config import TenantConfig
@@ -32,7 +35,7 @@ def _tenant() -> TenantConfig:
 
 
 def test_render_language_detector_prompt_includes_language_configuration() -> None:
-    prompt = render_language_detector_prompt(_tenant())
+    prompt = render_language_detector_prompt(LANGUAGE_DETECTOR_PROMPT, _tenant())
 
     assert "es-ES,en-US" in prompt
     assert '"en-US"' in prompt

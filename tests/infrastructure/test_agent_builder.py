@@ -122,7 +122,7 @@ def test_agent_builder_builds_graph_with_expected_nodes_and_compiles(monkeypatch
     )
     monkeypatch.setattr(
         "admissions_conversation_engine.infrastructure.agent_builder.render_language_detector_prompt",
-        lambda _: "language-detector-prompt",
+        lambda *_: "language-detector-prompt",
     )
     monkeypatch.setattr(
         "admissions_conversation_engine.infrastructure.agent_builder.render_case_off_hours_prompt",
@@ -142,7 +142,11 @@ def test_agent_builder_builds_graph_with_expected_nodes_and_compiles(monkeypatch
     )
 
     checkpointer = object()
-    builder = AgentBuilder(app_config=_app_config(), checkpointer=checkpointer)
+    builder = AgentBuilder(
+        app_config=_app_config(),
+        checkpointer=checkpointer,
+        langfuse_client=None,
+    )
 
     compiled = builder.build()
     graph = FakeStateGraph.last_instance

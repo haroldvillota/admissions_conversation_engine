@@ -131,14 +131,45 @@ Se incluyen dos Dockerfiles:
 
 Ambos Dockerfiles incluyen `alembic.ini` y el directorio `alembic/` y ejecutan las migraciones automáticamente antes de iniciar la aplicación.
 
-### Build
+### Levantar el entorno local (recomendado)
+
+El `docker-compose.yml` levanta la aplicación y una base de datos PostgreSQL con pgvector lista para usar.
+
+**1. Crear el archivo `.env`**
+
+```bash
+cp env-example .env
+# Editar .env y completar las API keys (LLM__DEFAULT__API_KEY, etc.)
+# Las variables RAG__VECTOR_STORE__DSN y CHECKPOINTER__DSN son sobreescritas
+# automáticamente por docker-compose para apuntar al contenedor de Postgres.
+```
+
+**2. Levantar los servicios**
+
+```bash
+docker compose up --build
+```
+
+El servidor de LangGraph estará disponible en `http://localhost:2024`.
+Postgres estará disponible en `localhost:5432` (usuario: `postgres`, contraseña: `postgres`, base de datos: `admissions`).
+
+Las migraciones de Alembic se ejecutan automáticamente al iniciar el contenedor `app`.
+
+**3. Detener y limpiar**
+
+```bash
+docker compose down          # detiene los contenedores
+docker compose down -v       # detiene y elimina el volumen de Postgres
+```
+
+### Build manual
 
 ```bash
 docker build -t admissions-conversation-engine:prod .
 docker build -t admissions-conversation-engine:dev -f Dockerfile.dev .
 ```
 
-### Run
+### Run manual
 
 ```bash
 # usando .env local

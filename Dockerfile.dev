@@ -41,6 +41,8 @@ RUN uv sync --frozen
 
 COPY langgraph.json ./
 
+EXPOSE 2024
+
 # --- Ejecución ---
 # Ejecuta migraciones y luego inicia el servidor con hot-reloading.
 CMD ["sh", "-c", "alembic upgrade head && uv run langgraph dev --host 0.0.0.0 --no-browser"]

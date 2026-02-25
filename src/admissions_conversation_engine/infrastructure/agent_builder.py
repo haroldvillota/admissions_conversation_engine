@@ -138,7 +138,7 @@ class AgentBuilder:
         graph.add_node("overflow_node", SimpleLLMNode(llm_with_tool, formatted_overflow_prompt))
         graph.add_node("max_retries_node", SimpleLLMNode(llm_with_tool, formatted_max_retries_prompt))
 
-        graph.add_node("tools", ToolNode(llm_with_tool, formatted_off_hours_prompt, search_tool))
+        graph.add_node("tools", ToolNode(llm_with_tool, search_tool))
 
         graph.add_edge(START, "setup")
         graph.add_edge("setup", "language_detector")

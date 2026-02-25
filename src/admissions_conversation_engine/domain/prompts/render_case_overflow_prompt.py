@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-from admissions_conversation_engine.domain.prompts.case_overflow_prompt import (
-    OVERFLOW_PROMPT,
-)
 from admissions_conversation_engine.domain.tenant_config import TenantConfig
 
 
-def render_case_overflow_prompt(config: TenantConfig) -> str:
-    return OVERFLOW_PROMPT.format(
+def render_case_overflow_prompt(prompt: str, config: TenantConfig) -> str:
+    return prompt.format(
         institution=config.institution,
         allowed_topics=config.allowed_topics,
         tone=config.tone,

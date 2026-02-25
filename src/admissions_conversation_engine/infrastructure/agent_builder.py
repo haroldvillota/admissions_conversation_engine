@@ -43,18 +43,31 @@ from admissions_conversation_engine.infrastructure.config.app_config import AppC
 from admissions_conversation_engine.domain.prompts.render_guardrail_prompt import (
     render_guardrail_prompt,
 )
-from admissions_conversation_engine.domain.prompts.language_detector_prompt import LANGUAGE_DETECTOR_PROMPT
+from admissions_conversation_engine.domain.prompts.guardrail_prompt import GUARDRAIL_PROMPT
+from admissions_conversation_engine.domain.prompts.language_detector_prompt import (
+    LANGUAGE_DETECTOR_PROMPT,
+)
 from admissions_conversation_engine.domain.prompts.render_language_detector_prompt import (
     render_language_detector_prompt,
 )
+from admissions_conversation_engine.domain.prompts.case_off_hours_prompt import OFF_HOURS_PROMPT
 from admissions_conversation_engine.domain.prompts.render_case_off_hours_prompt import (
     render_case_off_hours_prompt,
+)
+from admissions_conversation_engine.domain.prompts.case_low_scoring_prompt import (
+    LOW_SCORING_PROMPT,
 )
 from admissions_conversation_engine.domain.prompts.render_case_low_scoring_prompt import (
     render_case_low_scoring_prompt,
 )
+from admissions_conversation_engine.domain.prompts.case_overflow_prompt import (
+    OVERFLOW_PROMPT,
+)
 from admissions_conversation_engine.domain.prompts.render_case_overflow_prompt import (
     render_case_overflow_prompt,
+)
+from admissions_conversation_engine.domain.prompts.case_max_retries_prompt import (
+    MAX_RETRIES_PROMPT,
 )
 from admissions_conversation_engine.domain.prompts.render_case_max_retries_prompt import (
     render_case_max_retries_prompt,
@@ -81,17 +94,30 @@ class AgentBuilder:
         llm_with_tool = llm.bind_tools([search_tool])
 
         if self.langfuse_client is not None:
-            formatted_guardrail_prompt = self.langfuse_client.get_prompt("guardrail").prompt
+            guardrail_prompt = self.langfuse_client.get_prompt("guardrail")
             language_detector_prompt = self.langfuse_client.get_prompt("language_detector")
+            formatted_guardrail_prompt = render_guardrail_prompt(
+                guardrail_prompt.prompt, self.app_config.tenant
+            )
             formatted_language_detector_prompt = render_language_detector_prompt(language_detector_prompt.prompt, self.app_config.tenant)
         else:
-            formatted_guardrail_prompt = render_guardrail_prompt(self.app_config.tenant)
+            formatted_guardrail_prompt = render_guardrail_prompt(
+                GUARDRAIL_PROMPT, self.app_config.tenant
+            )
             formatted_language_detector_prompt = render_language_detector_prompt(LANGUAGE_DETECTOR_PROMPT, self.app_config.tenant)
 
-        formatted_off_hours_prompt = render_case_off_hours_prompt(self.app_config.tenant)
-        formatted_low_scoring_prompt = render_case_low_scoring_prompt(self.app_config.tenant)
-        formatted_overflow_prompt = render_case_overflow_prompt(self.app_config.tenant)
-        formatted_max_retries_prompt = render_case_max_retries_prompt(self.app_config.tenant)
+        formatted_off_hours_prompt = render_case_off_hours_prompt(
+            OFF_HOURS_PROMPT, self.app_config.tenant
+        )
+        formatted_low_scoring_prompt = render_case_low_scoring_prompt(
+            LOW_SCORING_PROMPT, self.app_config.tenant
+        )
+        formatted_overflow_prompt = render_case_overflow_prompt(
+            OVERFLOW_PROMPT, self.app_config.tenant
+        )
+        formatted_max_retries_prompt = render_case_max_retries_prompt(
+            MAX_RETRIES_PROMPT, self.app_config.tenant
+        )
 
         graph = StateGraph(AgentState, context_schema=ContextSchema)
         

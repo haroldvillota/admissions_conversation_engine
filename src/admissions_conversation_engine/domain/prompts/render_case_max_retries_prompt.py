@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-from admissions_conversation_engine.domain.prompts.case_max_retries_prompt import (
-    MAX_RETRIES_PROMPT,
-)
 from admissions_conversation_engine.domain.tenant_config import TenantConfig
 
 
-def render_case_max_retries_prompt(config: TenantConfig) -> str:
-    return MAX_RETRIES_PROMPT.format(
+def render_case_max_retries_prompt(prompt: str, config: TenantConfig) -> str:
+    return prompt.format(
         institution=config.institution,
         allowed_topics=config.allowed_topics,
         tone=config.tone,

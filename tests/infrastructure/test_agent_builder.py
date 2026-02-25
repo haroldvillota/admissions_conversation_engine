@@ -118,7 +118,7 @@ def test_agent_builder_builds_graph_with_expected_nodes_and_compiles(monkeypatch
     )
     monkeypatch.setattr(
         "admissions_conversation_engine.infrastructure.agent_builder.render_guardrail_prompt",
-        lambda _: "guardrail-prompt",
+        lambda *_: "guardrail-prompt",
     )
     monkeypatch.setattr(
         "admissions_conversation_engine.infrastructure.agent_builder.render_language_detector_prompt",
@@ -126,19 +126,19 @@ def test_agent_builder_builds_graph_with_expected_nodes_and_compiles(monkeypatch
     )
     monkeypatch.setattr(
         "admissions_conversation_engine.infrastructure.agent_builder.render_case_off_hours_prompt",
-        lambda _: "off-hours-prompt",
+        lambda *_: "off-hours-prompt",
     )
     monkeypatch.setattr(
         "admissions_conversation_engine.infrastructure.agent_builder.render_case_low_scoring_prompt",
-        lambda _: "low-scoring-prompt",
+        lambda *_: "low-scoring-prompt",
     )
     monkeypatch.setattr(
         "admissions_conversation_engine.infrastructure.agent_builder.render_case_overflow_prompt",
-        lambda _: "overflow-prompt",
+        lambda *_: "overflow-prompt",
     )
     monkeypatch.setattr(
         "admissions_conversation_engine.infrastructure.agent_builder.render_case_max_retries_prompt",
-        lambda _: "max-retries-prompt",
+        lambda *_: "max-retries-prompt",
     )
 
     checkpointer = object()

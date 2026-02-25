@@ -32,6 +32,10 @@ COPY --from=builder /app/src /app/src
 COPY --from=builder /app/alembic.ini /app/alembic.ini
 COPY --from=builder /app/alembic /app/alembic
 
+# Copiamos y preparamos el entrypoint que ejecuta migraciones antes de iniciar
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 # Configuración de Python para contenedores
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
@@ -40,5 +44,8 @@ ENV PATH="/app/.venv/bin:$PATH" \
 # Cambiamos al usuario de ejecución
 USER appuser
 
-# Ejecutamos el script definido en [project.scripts] en el pyproject.toml
+# Ejecuta migraciones y luego el comando pasado como CMD
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+# Script definido en [project.scripts] en el pyproject.toml
 CMD ["start"]

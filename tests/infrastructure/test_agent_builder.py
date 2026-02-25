@@ -1,5 +1,6 @@
 from admissions_conversation_engine.infrastructure.agent_builder import AgentBuilder
 from admissions_conversation_engine.infrastructure.config.app_config import AppConfig
+from admissions_conversation_engine.infrastructure.prompt_provider import FormattedPrompts
 
 
 class FakeStateGraph:
@@ -108,6 +109,20 @@ def test_agent_builder_builds_graph_with_expected_nodes_and_compiles(monkeypatch
         def build_llm(self):
             return FakeLLM(self._profile.model)
 
+    class FakePromptProvider:
+        def __init__(self, langfuse_client, tenant):
+            pass
+
+        def get_formatted_prompts(self):
+            return FormattedPrompts(
+                guardrail="guardrail-prompt",
+                language_detector="language-detector-prompt",
+                off_hours="off-hours-prompt",
+                low_scoring="low-scoring-prompt",
+                overflow="overflow-prompt",
+                max_retries="max-retries-prompt",
+            )
+
     monkeypatch.setattr(
         "admissions_conversation_engine.infrastructure.agent_builder.StateGraph",
         FakeStateGraph,
@@ -117,28 +132,8 @@ def test_agent_builder_builds_graph_with_expected_nodes_and_compiles(monkeypatch
         FakeLLMFactory,
     )
     monkeypatch.setattr(
-        "admissions_conversation_engine.infrastructure.agent_builder.render_guardrail_prompt",
-        lambda *_: "guardrail-prompt",
-    )
-    monkeypatch.setattr(
-        "admissions_conversation_engine.infrastructure.agent_builder.render_language_detector_prompt",
-        lambda *_: "language-detector-prompt",
-    )
-    monkeypatch.setattr(
-        "admissions_conversation_engine.infrastructure.agent_builder.render_case_off_hours_prompt",
-        lambda *_: "off-hours-prompt",
-    )
-    monkeypatch.setattr(
-        "admissions_conversation_engine.infrastructure.agent_builder.render_case_low_scoring_prompt",
-        lambda *_: "low-scoring-prompt",
-    )
-    monkeypatch.setattr(
-        "admissions_conversation_engine.infrastructure.agent_builder.render_case_overflow_prompt",
-        lambda *_: "overflow-prompt",
-    )
-    monkeypatch.setattr(
-        "admissions_conversation_engine.infrastructure.agent_builder.render_case_max_retries_prompt",
-        lambda *_: "max-retries-prompt",
+        "admissions_conversation_engine.infrastructure.agent_builder.PromptProvider",
+        FakePromptProvider,
     )
 
     checkpointer = object()
@@ -202,27 +197,27 @@ def test_agent_builder_fetches_all_prompts_from_langfuse(monkeypatch) -> None:
         FakeLLMFactory,
     )
     monkeypatch.setattr(
-        "admissions_conversation_engine.infrastructure.agent_builder.render_guardrail_prompt",
+        "admissions_conversation_engine.infrastructure.prompt_provider.render_guardrail_prompt",
         lambda *_: "guardrail-prompt",
     )
     monkeypatch.setattr(
-        "admissions_conversation_engine.infrastructure.agent_builder.render_language_detector_prompt",
+        "admissions_conversation_engine.infrastructure.prompt_provider.render_language_detector_prompt",
         lambda *_: "language-detector-prompt",
     )
     monkeypatch.setattr(
-        "admissions_conversation_engine.infrastructure.agent_builder.render_case_off_hours_prompt",
+        "admissions_conversation_engine.infrastructure.prompt_provider.render_case_off_hours_prompt",
         lambda *_: "off-hours-prompt",
     )
     monkeypatch.setattr(
-        "admissions_conversation_engine.infrastructure.agent_builder.render_case_low_scoring_prompt",
+        "admissions_conversation_engine.infrastructure.prompt_provider.render_case_low_scoring_prompt",
         lambda *_: "low-scoring-prompt",
     )
     monkeypatch.setattr(
-        "admissions_conversation_engine.infrastructure.agent_builder.render_case_overflow_prompt",
+        "admissions_conversation_engine.infrastructure.prompt_provider.render_case_overflow_prompt",
         lambda *_: "overflow-prompt",
     )
     monkeypatch.setattr(
-        "admissions_conversation_engine.infrastructure.agent_builder.render_case_max_retries_prompt",
+        "admissions_conversation_engine.infrastructure.prompt_provider.render_case_max_retries_prompt",
         lambda *_: "max-retries-prompt",
     )
 

@@ -11,10 +11,10 @@ dev:
 	@uv run langgraph dev
 
 test:
-	@PYTHONPATH=src uv run --with pytest pytest -q
+	@PYTHONPATH=src uv run --with pytest --with pytest-asyncio pytest -q
 
 test-debug:
-	@PYTHONPATH=src uv run --with pytest pytest -vv
+	@PYTHONPATH=src uv run --with pytest --with pytest-asyncio pytest -vv
 
 check:
 	uv run --with mypy mypy src

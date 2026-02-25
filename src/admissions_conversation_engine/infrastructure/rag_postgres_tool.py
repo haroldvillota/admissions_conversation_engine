@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from langchain_core.tools import BaseTool
 from langchain_openai import OpenAIEmbeddings
 from langchain_postgres import PGEngine, PGVectorStore
@@ -32,8 +33,26 @@ class PostgresVectorStoreTool(BaseTool):
         return "\n\n".join(d.page_content for d in docs if d.page_content)
 
     async def _arun(self, query: str) -> str:
-        # TODO
-        return self._run(query)
+        if not query.strip():
+            return ""
+
+        store = self._get_vector_store()
+
+        if hasattr(store, "asimilarity_search"):
+            docs = await store.asimilarity_search(query, k=self.rag_config.vector_store.top_k)
+        else:
+            # ASYNC-LIMITATION: el vector store configurado solo expone API síncrona en este runtime.
+            # Fallback explícito a thread para no bloquear el event loop.
+            docs = await asyncio.to_thread(
+                store.similarity_search,
+                query,
+                k=self.rag_config.vector_store.top_k,
+            )
+        
+        if not docs:
+            return ""
+
+        return "\n\n".join(d.page_content for d in docs if d.page_content)
 
     def _get_vector_store(self) -> PGVectorStore:
         if self._vector_store is not None:

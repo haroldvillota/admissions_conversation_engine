@@ -1,17 +1,3 @@
-from admissions_conversation_engine.domain.tenant_config import TenantConfig
-
-def render_case_max_retries_prompt(config: TenantConfig) -> str:
-    return MAX_RETRIES_PROMPT.format(
-        institution=config.institution,
-        allowed_topics=config.allowed_topics,
-        tone=config.tone,
-        allowed_languages=config.allowed_languages,
-        language_fallback=config.language_fallback,
-        terms_of_service=config.terms_of_service
-    )
-
-
-
 MAX_RETRIES_PROMPT = """
 Eres un asistente virtual de admisiones de la institución: {institution}.
 

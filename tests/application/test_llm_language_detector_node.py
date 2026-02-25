@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 
+import pytest
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.runnables import RunnableLambda
 
@@ -47,7 +48,8 @@ def test_parse_allowed_languages_strips_values() -> None:
     assert result == ["es-ES", "en-US"]
 
 
-def test_language_detector_returns_detected_language_and_clamped_confidence() -> None:
+@pytest.mark.asyncio
+async def test_language_detector_returns_detected_language_and_clamped_confidence() -> None:
     node = LlmLanguageDetectorNode(
         llm=_llm_with_content('{"language":"es-ES","confidence":1.7}'),
         prompt="detector",
@@ -55,12 +57,13 @@ def test_language_detector_returns_detected_language_and_clamped_confidence() ->
     )
     state = {"messages": [HumanMessage(content="Hola")]}
 
-    result = node(state=state, runtime=_runtime())  # type: ignore[arg-type]
+    result = await node(state=state, runtime=_runtime())  # type: ignore[arg-type]
 
     assert result == {"language": "es-ES", "language_confidence": 1.0}
 
 
-def test_language_detector_uses_fallback_for_invalid_json() -> None:
+@pytest.mark.asyncio
+async def test_language_detector_uses_fallback_for_invalid_json() -> None:
     node = LlmLanguageDetectorNode(
         llm=_llm_with_content("not-json"),
         prompt="detector",
@@ -68,12 +71,13 @@ def test_language_detector_uses_fallback_for_invalid_json() -> None:
     )
     state = {"messages": [HumanMessage(content="Hola")]}
 
-    result = node(state=state, runtime=_runtime())  # type: ignore[arg-type]
+    result = await node(state=state, runtime=_runtime())  # type: ignore[arg-type]
 
     assert result == {"language": "en-US", "language_confidence": 0.0}
 
 
-def test_language_detector_uses_fallback_for_language_outside_allowed_list() -> None:
+@pytest.mark.asyncio
+async def test_language_detector_uses_fallback_for_language_outside_allowed_list() -> None:
     node = LlmLanguageDetectorNode(
         llm=_llm_with_content('{"language":"fr-FR","confidence":0.8}'),
         prompt="detector",
@@ -81,12 +85,13 @@ def test_language_detector_uses_fallback_for_language_outside_allowed_list() -> 
     )
     state = {"messages": [HumanMessage(content="Bonjour")]}
 
-    result = node(state=state, runtime=_runtime())  # type: ignore[arg-type]
+    result = await node(state=state, runtime=_runtime())  # type: ignore[arg-type]
 
     assert result == {"language": "en-US", "language_confidence": 0.8}
 
 
-def test_language_detector_defaults_confidence_to_zero_when_invalid() -> None:
+@pytest.mark.asyncio
+async def test_language_detector_defaults_confidence_to_zero_when_invalid() -> None:
     node = LlmLanguageDetectorNode(
         llm=_llm_with_content('{"language":"es-ES","confidence":"not-a-number"}'),
         prompt="detector",
@@ -94,6 +99,6 @@ def test_language_detector_defaults_confidence_to_zero_when_invalid() -> None:
     )
     state = {"messages": [HumanMessage(content="Hola")]}
 
-    result = node(state=state, runtime=_runtime())  # type: ignore[arg-type]
+    result = await node(state=state, runtime=_runtime())  # type: ignore[arg-type]
 
     assert result == {"language": "es-ES", "language_confidence": 0.0}

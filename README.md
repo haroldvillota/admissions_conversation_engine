@@ -28,7 +28,7 @@ El graph trabaja sobre un **estado explícito y tipado** (`AgentState`) y un **c
 * `language_confidence`: confianza de detección (`float | None`)
 * `guardrail_allowed`: bandera de seguridad (`bool`)
 * `guardrail_reason`: motivo (`OK | PROHIBITED_TOPIC | OUT_OF_SCOPE | INJECTION`)
-* `next_node`: siguiente nodo de enrutamiento (`str | None`)
+* `case_node`: nodo de enrutamiento según el caso de uso(`str | None`)
 
 ### `ContextSchema` (runtime.context)
 

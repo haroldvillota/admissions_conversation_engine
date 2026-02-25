@@ -18,7 +18,7 @@ use_vault = os.getenv("USE_VAULT", "0") == "1"
 vault_path = os.getenv("VAULT_PATH", "secret/myapp")
 
 app_config = get_app_config(use_vault=use_vault, vault_path=vault_path)
-print(app_config.model_dump_json(indent=2))
+
 langfuse = get_client()
 observability_handler = CallbackHandler()
 
@@ -31,7 +31,8 @@ else:
 
 builder = AgentBuilder(
     app_config=app_config,
-    checkpointer=None
+    checkpointer=None,
+    langfuse_client=langfuse
 )
 
 compiled_graph = builder.build()

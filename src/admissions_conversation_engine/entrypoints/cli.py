@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import os
 from dotenv import load_dotenv
 
@@ -33,20 +34,31 @@ class ConsoleConversationRunner:
             print("Authentication failed. Please check your credentials and host.")
 
         self.checkpointerManager = PostgresCheckpointerManager(app_config.checkpointer)
-        self.checkpointer = self.checkpointerManager.get_checkpointer()
+        self.checkpointer = None
         
-        chat_id = input("Chat ID (default new_id): ").strip() or "new_id"
-        channel_id = input("Channel ID (default wa): ").strip() or "wa"
-        case = input("Case (off_hours | low_scoring | overflow | max_retries) (default off_hours): ").strip()  or "off_hours"
-        user_name = input("Nombre del usuario (default Pedro): ").strip() or "Pedro"
+        self._app_config = app_config
+
+    async def run(self) -> None:
+        self.checkpointer = await self.checkpointerManager.aget_checkpointer()
+
+        chat_id = (await asyncio.to_thread(input, "Chat ID (default new_id): ")).strip() or "new_id"
+        channel_id = (await asyncio.to_thread(input, "Channel ID (default wa): ")).strip() or "wa"
+        case = (
+            (await asyncio.to_thread(
+                input,
+                "Case (off_hours | low_scoring | overflow | max_retries) (default off_hours): ",
+            ))
+            .strip()
+            or "off_hours"
+        )
+        user_name = (await asyncio.to_thread(input, "Nombre del usuario (default Pedro): ")).strip() or "Pedro"
 
         builder = AgentBuilder(
-            app_config=app_config,
+            app_config=self._app_config,
             checkpointer=self.checkpointer
         )
 
         self._graph = builder.build()
-        
         self._graph = self._graph.with_config(config={"callbacks": [self.observability_handler]})
 
         self._context = {
@@ -56,24 +68,22 @@ class ConsoleConversationRunner:
             "user_name": user_name,
         }
 
-    def run(self) -> None:
-
         print("Conversacion iniciada. Escribe 'salir' para terminar.")
         while True:
-            user_input = input("Tu: ").strip()
+            user_input = (await asyncio.to_thread(input, "Tu: ")).strip()
             if user_input.lower() in {"salir", "exit", "quit"}:
                 print("Hasta luego.")
-                self.checkpointerManager.shutdown()
+                await self.checkpointerManager.ashutdown()
                 return
-            
+
             config: RunnableConfig = {
                 "configurable": {"thread_id": self._context["chat_id"]},
-                "callbacks": [self.observability_handler]
+                "callbacks": [self.observability_handler],
             }
-            self._state = self._graph.invoke(
+            self._state = await self._graph.ainvoke(
                 {"messages": [{"type": "human", "content": user_input}]},
-                config = config,
-                context = self._context,
+                config=config,
+                context=self._context,
             )
 
             assistant_message = self._state["messages"][-1]
@@ -81,4 +91,4 @@ class ConsoleConversationRunner:
         
 
 def main() -> None:
-    ConsoleConversationRunner().run()
+    asyncio.run(ConsoleConversationRunner().run())

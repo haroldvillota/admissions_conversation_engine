@@ -3,11 +3,10 @@ from admissions_conversation_engine.domain.agent_state import AgentState, Contex
 
 
 class CaseRouterNode:
-    def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> AgentState:
+    async def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> AgentState:
         """
         Devuelve el nombre del siguiente nodo basado en runtime.context.case
         """
-        case = runtime.context.case
 
         mapping = {
             "off_hours": "off_hours_node",
@@ -16,5 +15,5 @@ class CaseRouterNode:
             "max_retries": "max_retries_node",
         }
 
-        next_node = mapping.get(runtime.context.case, "END")
-        return {"next_node": next_node}
+        case_node = mapping.get(runtime.context.case, "END")
+        return {"case_node": case_node}

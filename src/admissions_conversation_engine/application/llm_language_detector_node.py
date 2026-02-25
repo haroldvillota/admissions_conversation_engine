@@ -25,7 +25,7 @@ class LlmLanguageDetectorNode:
             if lang.strip()
         ]
 
-    def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> AgentState:
+    async def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> AgentState:
         """
         Detecta el idioma usando LLM y lo guarda en el estado:
         - language
@@ -50,7 +50,7 @@ class LlmLanguageDetectorNode:
         }
 
         chain = prompt_template | self._llm
-        response = chain.invoke(full_inputs)
+        response = await chain.ainvoke(full_inputs)
 
         # Parseo robusto del JSON
         try:

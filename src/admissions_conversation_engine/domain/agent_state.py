@@ -18,7 +18,7 @@ class AgentState(TypedDict):
     guardrail_reason: Literal["OK", "PROHIBITED_TOPIC", "OUT_OF_SCOPE", "INJECTION"]
 
     # Router
-    next_node: str | None
+    case_node: str | None
 
 
 @dataclass

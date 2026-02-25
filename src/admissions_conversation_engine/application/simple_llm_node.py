@@ -11,7 +11,7 @@ class SimpleLLMNode:
         self._llm = llm
         self._prompt = prompt
 
-    def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> AgentState:
+    async def __call__(self, state: AgentState, runtime: Runtime[ContextSchema]) -> AgentState:
 
         prompt_template = ChatPromptTemplate.from_messages([
             ("system", self._prompt),
@@ -22,7 +22,7 @@ class SimpleLLMNode:
         full_inputs = {**state, **context_dict}
 
         chain = prompt_template | self._llm
-        response = chain.invoke(full_inputs)
+        response = await chain.ainvoke(full_inputs)
         return {"messages": [response]}
         
 

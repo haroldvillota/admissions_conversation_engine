@@ -8,11 +8,9 @@ from langgraph.runtime import Runtime
 
 class SetupChatNode:
    
-    def __call__(self, state: AgentState, config: RunnableConfig, runtime: Runtime[ContextSchema]) -> AgentState:
+    async def __call__(self, state: AgentState, config: RunnableConfig, runtime: Runtime[ContextSchema]) -> AgentState:
         chat_id = runtime.context.chat_id
-        print(f"chat_id:{chat_id}")
         
-
         return state
         
 

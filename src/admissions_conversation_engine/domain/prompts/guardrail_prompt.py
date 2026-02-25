@@ -1,14 +1,5 @@
 from __future__ import annotations
 
-from admissions_conversation_engine.domain.tenant_config import TenantConfig
-
-
-def render_guardrail_prompt(config: TenantConfig) -> str:
-    return GUARDRAIL_PROMPT.format(
-        allowed_topics=config.allowed_topics
-    )
-
-
 GUARDRAIL_PROMPT = """
 Eres un clasificador de seguridad para un asistente de admisiones universitarias.
 Devuelve ÚNICAMENTE un JSON válido (sin markdown) con estas claves:

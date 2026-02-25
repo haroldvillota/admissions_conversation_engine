@@ -42,6 +42,5 @@ RUN uv sync --frozen
 COPY langgraph.json ./
 
 # --- Ejecución ---
-# En desarrollo, usamos 'uv run' o el binario directo para facilitar hot-reloading 
-# o depuración interactiva si el entrypoint lo permite.
-CMD ["uv","run","langgraph","dev","--host","0.0.0.0","--no-browser"]
+# Ejecuta migraciones y luego inicia el servidor con hot-reloading.
+CMD ["sh", "-c", "alembic upgrade head && uv run langgraph dev --host 0.0.0.0 --no-browser"]

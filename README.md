@@ -128,9 +128,8 @@ Se incluyen dos Dockerfiles:
 
 - `Dockerfile`: imagen de producción (instala dependencias sin `dev`).
 - `Dockerfile.dev`: imagen de desarrollo (incluye dependencias `dev`).
-- `Dockerfile-langsmith`: imagen para `docker-compose-langsmith.yml`.
 
-Los Dockerfiles incluyen `alembic.ini` y el directorio `alembic/` para poder ejecutar migraciones dentro del contenedor.
+Ambos Dockerfiles incluyen `alembic.ini` y el directorio `alembic/` y ejecutan las migraciones automáticamente antes de iniciar la aplicación.
 
 ### Build
 
@@ -144,7 +143,6 @@ docker build -t admissions-conversation-engine:dev -f Dockerfile.dev .
 ```bash
 # usando .env local
 docker run --rm -it -p 2024:2024 --env-file .env admissions-conversation-engine:dev
-
 ```
 
 ## 🗄️ Migraciones con Alembic
@@ -159,15 +157,17 @@ El proyecto incluye Alembic y la migración inicial:
 make migrate
 ```
 
-### Ejecutar migraciones en Docker Compose
+### Migraciones en Docker (desarrollo)
 
-En `docker-compose-langsmith.yml` se agregó el servicio `langgraph-migrate`, que ejecuta:
+`Dockerfile.dev` ejecuta `alembic upgrade head` automáticamente al iniciar el contenedor.
+
+### Migraciones en producción (CI/CD)
+
+La imagen de producción no ejecuta migraciones automáticamente. Se deben correr como paso manual en el pipeline de CI/CD:
 
 ```bash
-alembic upgrade head
+docker run --rm --env-file .env admissions-conversation-engine:prod alembic upgrade head
 ```
-
-`langgraph-api` ahora depende de que `langgraph-migrate` termine correctamente antes de iniciar.
 
 ---
 

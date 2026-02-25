@@ -40,5 +40,6 @@ ENV PATH="/app/.venv/bin:$PATH" \
 # Cambiamos al usuario de ejecución
 USER appuser
 
-# Ejecutamos el script definido en [project.scripts] en el pyproject.toml
+# Ejecuta la aplicación. Para correr migraciones manualmente (ej. desde CI/CD):
+#   docker run --rm --env-file .env <image> alembic upgrade head
 CMD ["start"]

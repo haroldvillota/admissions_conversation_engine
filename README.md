@@ -157,9 +157,17 @@ El proyecto incluye Alembic y la migración inicial:
 make migrate
 ```
 
-### Migraciones en Docker
+### Migraciones en Docker (desarrollo)
 
-Ambas imágenes ejecutan `alembic upgrade head` automáticamente al iniciar el contenedor, antes de levantar la aplicación.
+`Dockerfile.dev` ejecuta `alembic upgrade head` automáticamente al iniciar el contenedor.
+
+### Migraciones en producción (CI/CD)
+
+La imagen de producción no ejecuta migraciones automáticamente. Se deben correr como paso manual en el pipeline de CI/CD:
+
+```bash
+docker run --rm --env-file .env admissions-conversation-engine:prod alembic upgrade head
+```
 
 ---
 

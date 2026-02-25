@@ -96,10 +96,10 @@ class AgentBuilder:
         if self.langfuse_client is not None:
             guardrail_prompt = self.langfuse_client.get_prompt("guardrail")
             language_detector_prompt = self.langfuse_client.get_prompt("language_detector")
-            off_hours_prompt = self.langfuse_client.get_prompt("off_hours")
-            low_scoring_prompt = self.langfuse_client.get_prompt("low_scoring")
-            overflow_prompt = self.langfuse_client.get_prompt("overflow")
-            max_retries_prompt = self.langfuse_client.get_prompt("max_retries")
+            off_hours_prompt = self.langfuse_client.get_prompt("case_off_hours")
+            low_scoring_prompt = self.langfuse_client.get_prompt("case_low_scoring")
+            overflow_prompt = self.langfuse_client.get_prompt("case_overflow")
+            max_retries_prompt = self.langfuse_client.get_prompt("case_max_retries")
             formatted_guardrail_prompt = render_guardrail_prompt(
                 guardrail_prompt.prompt, self.app_config.tenant
             )

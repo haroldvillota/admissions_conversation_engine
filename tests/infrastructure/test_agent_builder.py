@@ -238,8 +238,8 @@ def test_agent_builder_fetches_all_prompts_from_langfuse(monkeypatch) -> None:
     assert set(langfuse_client.fetched) == {
         "guardrail",
         "language_detector",
-        "off_hours",
-        "low_scoring",
-        "overflow",
-        "max_retries",
+        "case_off_hours",
+        "case_low_scoring",
+        "case_overflow",
+        "case_max_retries",
     }

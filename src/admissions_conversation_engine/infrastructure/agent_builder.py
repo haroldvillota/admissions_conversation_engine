@@ -32,6 +32,8 @@ from admissions_conversation_engine.application.case_router_node import (
     CaseRouterNode,
 )
 
+from langfuse import Langfuse
+
 from admissions_conversation_engine.domain.agent_state import AgentState, ContextSchema
 from admissions_conversation_engine.infrastructure.llm_factory import LLMFactory
 from dataclasses import dataclass
@@ -39,7 +41,7 @@ from dataclasses import dataclass
 from admissions_conversation_engine.infrastructure.config.app_config import AppConfig
 
 from admissions_conversation_engine.domain.prompts.guardrail_prompt import render_guardrail_prompt
-from admissions_conversation_engine.domain.prompts.language_detector_prompt import render_language_detector_prompt
+from admissions_conversation_engine.domain.prompts.language_detector_prompt import render_language_detector_prompt, LANGUAGE_DETECTOR_PROMPT
 from admissions_conversation_engine.domain.prompts.case_off_hours_prompt import render_case_off_hours_prompt
 from admissions_conversation_engine.domain.prompts.case_low_scoring_prompt import render_case_low_scoring_prompt
 from admissions_conversation_engine.domain.prompts.case_overflow_prompt import render_case_overflow_prompt
@@ -51,6 +53,7 @@ class AgentBuilder:
 
     checkpointer: Any
     app_config: AppConfig
+    langfuse_client: Langfuse
 
     def build(self) -> Any:
 
@@ -64,8 +67,13 @@ class AgentBuilder:
 
         llm_with_tool = llm.bind_tools([search_tool])
 
-        formatted_guardrail_prompt = render_guardrail_prompt(self.app_config.tenant)
-        formatted_language_detector_prompt = render_language_detector_prompt(self.app_config.tenant)
+        if self.langfuse_client is not None:
+            formatted_guardrail_prompt = self.langfuse_client.get_prompt("guardrail").prompt
+            language_detector_prompt = self.langfuse_client.get_prompt("language_detector")
+            formatted_language_detector_prompt = render_language_detector_prompt(language_detector_prompt.prompt, self.app_config.tenant)
+        else:
+            formatted_guardrail_prompt = render_guardrail_prompt(self.app_config.tenant)
+            formatted_language_detector_prompt = render_language_detector_prompt(LANGUAGE_DETECTOR_PROMPT, self.app_config.tenant)
 
         formatted_off_hours_prompt = render_case_off_hours_prompt(self.app_config.tenant)
         formatted_low_scoring_prompt = render_case_low_scoring_prompt(self.app_config.tenant)
@@ -73,6 +81,7 @@ class AgentBuilder:
         formatted_max_retries_prompt = render_case_max_retries_prompt(self.app_config.tenant)
 
         graph = StateGraph(AgentState, context_schema=ContextSchema)
+        
         graph.add_node("setup", SetupChatNode())
         graph.add_node(
             "language_detector",

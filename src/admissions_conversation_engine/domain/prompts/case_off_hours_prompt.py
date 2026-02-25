@@ -1,11 +1,3 @@
-from admissions_conversation_engine.domain.tenant_config import TenantConfig
-
-def render_case_off_hours_prompt(config: TenantConfig) -> str:
-    return OFF_HOURS_PROMPT.format(
-        institution=config.institution,
-        tone=config.tone,
-    )
-
 OFF_HOURS_PROMPT = """
 Eres un asistente virtual de admisiones de la institución: {institution}.
 

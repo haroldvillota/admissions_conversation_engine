@@ -1,16 +1,16 @@
-from admissions_conversation_engine.domain.prompts.case_low_scoring_prompt import (
+from admissions_conversation_engine.domain.prompts.render_case_low_scoring_prompt import (
     render_case_low_scoring_prompt,
 )
-from admissions_conversation_engine.domain.prompts.case_max_retries_prompt import (
+from admissions_conversation_engine.domain.prompts.render_case_max_retries_prompt import (
     render_case_max_retries_prompt,
 )
-from admissions_conversation_engine.domain.prompts.case_off_hours_prompt import (
+from admissions_conversation_engine.domain.prompts.render_case_off_hours_prompt import (
     render_case_off_hours_prompt,
 )
-from admissions_conversation_engine.domain.prompts.case_overflow_prompt import (
+from admissions_conversation_engine.domain.prompts.render_case_overflow_prompt import (
     render_case_overflow_prompt,
 )
-from admissions_conversation_engine.domain.prompts.guardrail_prompt import (
+from admissions_conversation_engine.domain.prompts.render_guardrail_prompt import (
     render_guardrail_prompt,
 )
 from admissions_conversation_engine.domain.prompts.render_language_detector_prompt import (

@@ -122,57 +122,74 @@ El sistema adopta **Programación Orientada a Objetos** como modelo principal pa
 
 ---
 
-## 🐳 Docker
+## 🐳 Contenedores
 
-Se incluyen dos Dockerfiles:
+Este proyecto separa claramente los flujos de **producción** y **desarrollo local**:
 
-- `Dockerfile`: imagen de producción (instala dependencias sin `dev`).
-- `Dockerfile.dev`: imagen de desarrollo (incluye dependencias `dev`).
+- `Dockerfile`: imagen de **producción** (`uv sync --no-dev`).
+- `Dockerfile.dev`: imagen de **desarrollo local** (incluye dependencias `dev`).
+- `docker-compose-dev.yml`: orquestación local de `app` + `db` (PostgreSQL con pgvector).
 
-Ambos Dockerfiles incluyen `alembic.ini` y el directorio `alembic/` y ejecutan las migraciones automáticamente antes de iniciar la aplicación.
+### Producción (`Dockerfile`)
 
-### Levantar el entorno local (recomendado)
+- Construye una imagen multi-stage optimizada para runtime.
+- Inicia con `CMD ["start"]`.
+- Incluye `alembic.ini` y `alembic/` para permitir ejecutar migraciones cuando se necesite.
+- **No** corre migraciones automáticamente al iniciar.
 
-El `docker-compose.yml` levanta la aplicación y una base de datos PostgreSQL con pgvector lista para usar.
+Build:
+
+```bash
+docker build -t admissions-conversation-engine:prod .
+```
+
+Run:
+
+```bash
+docker run --rm -p 2024:2024 --env-file .env admissions-conversation-engine:prod
+```
+
+### Desarrollo local (`Dockerfile.dev` + `docker-compose-dev.yml`)
+
+- El contenedor `app` se construye con `Dockerfile.dev`.
+- Ejecuta migraciones al arrancar (`alembic upgrade head`) y luego inicia el script CLI del proyecto (`uv run cli`), definido en `pyproject.toml` (`[project.scripts] cli = ...`).
+- Monta `./src:/app/src` para reflejar cambios de código en local.
+- Levanta `db` con `pgvector/pgvector:pg17`.
 
 **1. Crear el archivo `.env`**
 
 ```bash
 cp env-example .env
 # Editar .env y completar las API keys (LLM__DEFAULT__API_KEY, etc.)
-# Las variables RAG__VECTOR_STORE__DSN y CHECKPOINTER__DSN son sobreescritas
-# automáticamente por docker-compose para apuntar al contenedor de Postgres.
+# RAG__VECTOR_STORE__DSN y CHECKPOINTER__DSN son sobreescritas en compose
+# para apuntar al contenedor db.
 ```
 
-**2. Levantar los servicios**
+**2. Levantar servicios de desarrollo**
 
 ```bash
-docker compose up --build
+docker compose -f docker-compose-dev.yml up --build
 ```
 
-El servidor de LangGraph estará disponible en `http://localhost:2024`.
-Postgres estará disponible en `localhost:5432` (usuario: `postgres`, contraseña: `postgres`, base de datos: `admissions`).
-
-Las migraciones de Alembic se ejecutan automáticamente al iniciar el contenedor `app`.
+App disponible en `http://localhost:2024`.
+Postgres disponible en `localhost:5432` (usuario: `postgres`, contraseña: `postgres`, base: `admissions`).
 
 **3. Detener y limpiar**
 
 ```bash
-docker compose down          # detiene los contenedores
-docker compose down -v       # detiene y elimina el volumen de Postgres
+docker compose -f docker-compose-dev.yml down
+docker compose -f docker-compose-dev.yml down -v
 ```
 
-### Build manual
+### Build manual (desarrollo)
 
 ```bash
-docker build -t admissions-conversation-engine:prod .
 docker build -t admissions-conversation-engine:dev -f Dockerfile.dev .
 ```
 
-### Run manual
+### Run manual (desarrollo)
 
 ```bash
-# usando .env local
 docker run --rm -it -p 2024:2024 --env-file .env admissions-conversation-engine:dev
 ```
 

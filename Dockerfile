@@ -12,6 +12,9 @@ COPY src ./src
 COPY alembic.ini ./alembic.ini
 COPY alembic ./alembic
 
+# Temporalmente para exponerlo a langsmith studio
+COPY langgraph.json ./
+
 # Instalamos dependencias y el proyecto. 
 # --no-dev: Evita instalar librerías de test/linting en producción.
 RUN uv sync --frozen --no-dev
@@ -31,6 +34,10 @@ COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/src /app/src
 COPY --from=builder /app/alembic.ini /app/alembic.ini
 COPY --from=builder /app/alembic /app/alembic
+
+# Temporalmente para exponerlo a langsmith studio
+COPY --from=builder /app/langgraph.json /app/langgraph.json
+RUN mkdir -p /app/.langgraph_api && chown -R appuser:appuser /app
 
 # Configuración de Python para contenedores
 ENV PATH="/app/.venv/bin:$PATH" \

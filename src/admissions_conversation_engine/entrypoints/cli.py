@@ -17,8 +17,7 @@ class ConsoleConversationRunner:
     def __init__(self) -> None:
 
         app_config = get_app_config()
-        print(app_config.model_dump_json(indent=2))
-        exit
+        
         self.langfuse, self.observability_handler = build_langfuse_client(app_config)
 
         self.checkpointerManager = PostgresCheckpointerManager(app_config.checkpointer)

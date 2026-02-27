@@ -79,3 +79,6 @@ class AppConfig(BaseSettings):
     checkpointer: CheckpointerConfig
     observability: ObservabilityConfig
     tenant: TenantConfig
+
+    def __str__(self) -> str:
+        return self.model_dump_json(indent=2, ensure_ascii=False)

@@ -116,7 +116,7 @@ def get_app_config() -> AppConfig:
     load_dotenv()
 
     use_vault = os.getenv("USE_VAULT", "0") == "1"
-    vault_path = os.getenv("VAULT_PATH", "secret/myapp")
+    vault_path = os.getenv("VAULT_PATH", "admissions")
 
     env_source = EnvironmentVariableConfigSource()
 

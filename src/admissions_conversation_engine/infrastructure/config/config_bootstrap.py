@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import os
+from dotenv import load_dotenv
+
 from dataclasses import dataclass
 from functools import lru_cache
+
 from typing import Any
 
 from pydantic import ValidationError
@@ -108,7 +112,12 @@ class AppConfigBootstrapper:
 
 
 @lru_cache(maxsize=1)
-def get_app_config(*, use_vault: bool, vault_path: str) -> AppConfig:
+def get_app_config() -> AppConfig:
+    load_dotenv()
+
+    use_vault = os.getenv("USE_VAULT", "0") == "1"
+    vault_path = os.getenv("VAULT_PATH", "secret/myapp")
+
     env_source = EnvironmentVariableConfigSource()
 
     if not use_vault:

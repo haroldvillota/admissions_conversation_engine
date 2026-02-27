@@ -1,38 +1,21 @@
 services:
-  app:
+  app-cli:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    image: admissions-conversation-engine:dev
     ports:
       - "2024:2024"
     env_file: .env
-    environment:
-      # Apuntan al servicio 'db' dentro de la red Docker
-      RAG__VECTOR_STORE__DSN: "postgresql+psycopg://postgres:postgres@db:5432/admissions"
-      CHECKPOINTER__DSN: "postgresql://postgres:postgres@db:5432/admissions"
     volumes:
       # Hot-reload: los cambios en src/ se reflejan sin reconstruir la imagen
       - ./src:/app/src
-    depends_on:
-      db:
-        condition: service_healthy
+    command: cli
+    stdin_open: true
+    tty: true
+    networks:
+      - intranet
 
-  db:
-    image: pgvector/pgvector:pg17
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: admissions
-    ports:
-      # Expone postgres para poder conectarse con un cliente local (ej. DBeaver, psql)
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d admissions"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-volumes:
-  postgres_data:
+networks:
+  intranet:
+    external: true

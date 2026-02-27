@@ -160,19 +160,15 @@ docker run --rm -p 2024:2024 --env-file .env admissions-conversation-engine:prod
 
 ```bash
 cp env-example .env
-# Editar .env y completar las API keys (LLM__DEFAULT__API_KEY, etc.)
-# RAG__VECTOR_STORE__DSN y CHECKPOINTER__DSN son sobreescritas en compose
-# para apuntar al contenedor db.
+# Editar .env y completar las API keys (LLM__DEFAULT__API_KEY, RAG__VECTOR_STORE__DSN, CHECKPOINTER__DSN, etc.)
 ```
 
 **2. Levantar servicios de desarrollo**
 
 ```bash
-docker compose -f docker-compose-dev.yml up --build
+docker compose -f docker-compose-dev.yml build
+docker compose -f docker-compose-dev.yml run --rm app-cli
 ```
-
-App disponible en `http://localhost:2024`.
-Postgres disponible en `localhost:5432` (usuario: `postgres`, contraseña: `postgres`, base: `admissions`).
 
 **3. Detener y limpiar**
 
@@ -190,7 +186,7 @@ docker build -t admissions-conversation-engine:dev -f Dockerfile.dev .
 ### Run manual (desarrollo)
 
 ```bash
-docker run --rm -it -p 2024:2024 --env-file .env admissions-conversation-engine:dev
+docker run --rm -it -p 2024:2024 --env-file .env admissions-conversation-engine:dev cli
 ```
 
 ## 🗄️ Migraciones con Alembic

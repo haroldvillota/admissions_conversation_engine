@@ -23,7 +23,7 @@ LLM__TRANSLATOR__MODEL="gpt-4.1-nano"
 LLM__TRANSLATOR__TEMPERATURE="0.0"
 
 CHECKPOINTER__KIND="postgresql"
-CHECKPOINTER__DSN="postgresql+psycopg://user:pass@host:5432/db" # Secret
+CHECKPOINTER__DSN="postgresql://user:pass@host:5432/db" # Secret
 
 OBSERVABILITY__PROVIDER="langfuse" # Secret
 OBSERVABILITY__PUBLIC_KEY="..." # Secret

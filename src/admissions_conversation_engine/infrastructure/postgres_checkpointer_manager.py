@@ -29,7 +29,9 @@ class PostgresCheckpointerManager:
                 conninfo=self.config.dsn,
                 max_size=10,
                 kwargs={"autocommit": True},
+                open=False,
             )
+            await self._apool.open()
 
         saver = AsyncPostgresSaver(self._apool)
         await saver.setup()

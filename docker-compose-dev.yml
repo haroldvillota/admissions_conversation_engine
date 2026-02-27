@@ -9,7 +9,7 @@ services:
     environment:
       # Apuntan al servicio 'db' dentro de la red Docker
       RAG__VECTOR_STORE__DSN: "postgresql+psycopg://postgres:postgres@db:5432/admissions"
-      CHECKPOINTER__DSN: "postgresql+psycopg://postgres:postgres@db:5432/admissions"
+      CHECKPOINTER__DSN: "postgresql://postgres:postgres@db:5432/admissions"
     volumes:
       # Hot-reload: los cambios en src/ se reflejan sin reconstruir la imagen
       - ./src:/app/src

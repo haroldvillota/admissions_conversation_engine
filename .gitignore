@@ -11,6 +11,7 @@ wheels/
 
 # Environment
 .env
+.env-docker
 
 .langgraph_api/
 

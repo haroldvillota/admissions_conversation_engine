@@ -37,6 +37,7 @@ class ConsoleConversationRunner:
         self.checkpointer = None
         
         self._app_config = app_config
+        self._langfuse = langfuse
 
     async def run(self) -> None:
         self.checkpointer = await self.checkpointerManager.aget_checkpointer()
@@ -55,7 +56,8 @@ class ConsoleConversationRunner:
 
         builder = AgentBuilder(
             app_config=self._app_config,
-            checkpointer=self.checkpointer
+            checkpointer=self.checkpointer,
+            langfuse_client=self._langfuse
         )
 
         self._graph = builder.build()

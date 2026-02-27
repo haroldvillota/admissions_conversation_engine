@@ -4,14 +4,15 @@ import asyncio
 import os
 from dotenv import load_dotenv
 
+from admissions_conversation_engine.infrastructure.langfuse_factory import (
+    build_langfuse_client,
+)
 from admissions_conversation_engine.infrastructure.agent_builder import (
     AgentBuilder
 )
 from admissions_conversation_engine.infrastructure.config.config_bootstrap import get_app_config
 from admissions_conversation_engine.infrastructure.postgres_checkpointer_manager import PostgresCheckpointerManager
 from langchain_core.runnables import RunnableConfig
-from langfuse import get_client
-from langfuse.langchain import CallbackHandler
 
 class ConsoleConversationRunner:
 
@@ -24,20 +25,12 @@ class ConsoleConversationRunner:
 
         app_config = get_app_config(use_vault=use_vault, vault_path=vault_path)
 
-        langfuse = get_client()
-        self.observability_handler = CallbackHandler()
-
-        # Verify connection
-        if langfuse.auth_check():
-            print("Langfuse client is authenticated and ready!")
-        else:
-            print("Authentication failed. Please check your credentials and host.")
+        self.langfuse, self.observability_handler = build_langfuse_client(app_config)
 
         self.checkpointerManager = PostgresCheckpointerManager(app_config.checkpointer)
         self.checkpointer = None
         
         self._app_config = app_config
-        self._langfuse = langfuse
 
     async def run(self) -> None:
         self.checkpointer = await self.checkpointerManager.aget_checkpointer()
@@ -57,7 +50,7 @@ class ConsoleConversationRunner:
         builder = AgentBuilder(
             app_config=self._app_config,
             checkpointer=self.checkpointer,
-            langfuse_client=self._langfuse
+            langfuse_client=self.langfuse
         )
 
         self._graph = builder.build()

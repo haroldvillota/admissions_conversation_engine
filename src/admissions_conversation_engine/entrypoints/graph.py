@@ -3,13 +3,13 @@ from __future__ import annotations
 import os
 from dotenv import load_dotenv
 
+from admissions_conversation_engine.infrastructure.langfuse_factory import (
+    build_langfuse_client,
+)
 from admissions_conversation_engine.infrastructure.agent_builder import (
     AgentBuilder,
 )
 from admissions_conversation_engine.infrastructure.config.config_bootstrap import get_app_config
-
-from langfuse import get_client
-from langfuse.langchain import CallbackHandler
 
 
 load_dotenv()
@@ -19,14 +19,7 @@ vault_path = os.getenv("VAULT_PATH", "secret/myapp")
 
 app_config = get_app_config(use_vault=use_vault, vault_path=vault_path)
 
-langfuse = get_client()
-observability_handler = CallbackHandler()
-
-# Verify connection
-if langfuse.auth_check():
-    print("Langfuse client is authenticated and ready!")
-else:
-    print("Authentication failed. Please check your credentials and host.")
+langfuse, observability_handler = build_langfuse_client(app_config)
 
 
 builder = AgentBuilder(

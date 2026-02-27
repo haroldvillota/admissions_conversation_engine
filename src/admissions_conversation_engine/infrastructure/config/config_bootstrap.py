@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from dotenv import load_dotenv
 
 from dataclasses import dataclass
@@ -13,7 +12,6 @@ from pydantic import ValidationError
 from .app_config import AppConfig, LlmConfig
 from .config_source import ConfigSource
 from .env_config_source import EnvironmentVariableConfigSource
-from .merged_config_source import MergedConfigSource
 from .vault_config_source import VaultConfigSource
 
 
@@ -115,27 +113,7 @@ class AppConfigBootstrapper:
 def get_app_config() -> AppConfig:
     load_dotenv()
 
-    use_vault = os.getenv("USE_VAULT", "0") == "1"
-    vault_path = os.getenv("VAULT_PATH", "admissions")
-
     env_source = EnvironmentVariableConfigSource()
+    config_source = VaultConfigSource(base_source=env_source)
 
-    if not use_vault:
-        return AppConfigBootstrapper(config_source=env_source).load_app_config()
-
-    secret_override_keys = [
-        "RAG__VECTOR_STORE__DSN",
-        "RAG__EMBEDDINGS__API_KEY",
-        "CHECKPOINTER__DSN",
-        "LLM__DEFAULT__API_KEY",
-        "OBSERVABILITY__PUBLIC_KEY",
-        "OBSERVABILITY__SECRET_KEY",
-    ]
-
-    merged_source = MergedConfigSource(
-        base_source=env_source,
-        override_source=VaultConfigSource(vault_path=vault_path),
-        override_keys=secret_override_keys,
-    )
-
-    return AppConfigBootstrapper(config_source=merged_source).load_app_config()
+    return AppConfigBootstrapper(config_source=config_source).load_app_config()

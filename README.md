@@ -219,7 +219,7 @@ docker run --rm --env-file .env admissions-conversation-engine:prod alembic upgr
 
 El sistema usa variables con `__` para configuración anidada. Puedes usar `env-example` como plantilla.
 
-### Requeridas (según esquema actual)
+### Variables requeridas
 
 - `RAG__VECTOR_STORE__KIND`
 - `RAG__VECTOR_STORE__DSN`
@@ -239,7 +239,7 @@ El sistema usa variables con `__` para configuración anidada. Puedes usar `env-
 - `TENANT__LANGUAGE_FALLBACK`
 - `TENANT__ALLOWED_LANGUAGES`
 
-### Opcionales comunes
+### Variables opcionales
 
 - `RAG__VECTOR_STORE__TOP_K`
 - `RAG__EMBEDDINGS__PROVIDER`
@@ -255,7 +255,27 @@ El sistema usa variables con `__` para configuración anidada. Puedes usar `env-
 - `OBSERVABILITY__SECRET_KEY`
 - `OBSERVABILITY__BASE_URL`
 
-### Nota sobre fallback de LLM
+### Secretos en Azure Key Vault
+
+Cualquier variable de entorno cuyo valor comience con el prefijo `from_key_vault/<nombre-secreto>` es resuelta automáticamente desde Azure Key Vault en el arranque:
+
+```bash
+RAG__VECTOR_STORE__DSN=from_key_vault/admission-rag-vector-store-dsn
+LLM__DEFAULT__API_KEY=from_key_vault/admission-llm-default-api-key
+CHECKPOINTER__DSN=from_key_vault/admission-checkpointer-dsn
+```
+
+El texto después de `/` es el nombre exacto del secreto en el vault. La aplicación no distingue qué variables son secretos; simplemente reemplaza el valor en memoria antes de validar la configuración.
+
+Cuando al menos una variable usa este prefijo, es obligatorio definir también:
+
+- `AZURE_KEY_VAULT_URL` — URL del vault (ej. `https://<vault-name>.vault.azure.net/`)
+
+Las credenciales de Azure se resuelven mediante `DefaultAzureCredential` (managed identity, CLI, variables de entorno, etc.).
+
+Si una variable referencia un secreto que no existe en el vault, la aplicación falla al arrancar con un error explícito.
+
+### Fallbacks de configuración
 
 `config_bootstrap` completa `guardrail`, `react` y `translator` con valores de `llm.default` solo si esos campos vienen vacíos (`None` o `""`) una vez cargada la configuración.
 

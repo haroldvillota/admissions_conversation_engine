@@ -10,6 +10,8 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "alembic>=1.18.4",
     "azure-identity>=1.25.1",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
     "azure-keyvault-secrets>=4.10.0",
     "langchain>=1.2.7",
     "langchain-community>=0.4.1",
@@ -29,6 +31,7 @@ dependencies = [
 
 [project.scripts]
 cli = "admissions_conversation_engine.entrypoints.cli:main"
+api = "api:main"
 
 [build-system]
 requires = ["hatchling"]

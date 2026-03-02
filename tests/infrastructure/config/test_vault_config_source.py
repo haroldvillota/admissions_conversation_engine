@@ -47,6 +47,7 @@ def _make_source_with_fake_client(base_values: dict, vault_values: dict, monkeyp
 
 
 def test_vault_config_source_resolves_from_key_vault_references(monkeypatch) -> None:
+    # Verifica que los valores con prefijo "from_key_vault/" son resueltos correctamente desde Azure Key Vault.
     base_values = {
         "RAG__VECTOR_STORE__DSN": "from_key_vault/admission-rag-vector-store-dsn",
         "LLM__DEFAULT__API_KEY": "from_key_vault/admissions-llm-default-api-key",
@@ -69,6 +70,7 @@ def test_vault_config_source_resolves_from_key_vault_references(monkeypatch) -> 
 
 
 def test_vault_config_source_skips_vault_when_no_references() -> None:
+    # Verifica que si ningún valor tiene el prefijo "from_key_vault/", no se conecta a Key Vault y se devuelven los valores base.
     base_values = {
         "RAG__VECTOR_STORE__DSN": "postgresql://local-db",
         "LLM__DEFAULT__API_KEY": "local-key",
@@ -82,6 +84,7 @@ def test_vault_config_source_skips_vault_when_no_references() -> None:
 
 
 def test_vault_config_source_requires_vault_url_when_references_exist(monkeypatch) -> None:
+    # Verifica que si hay referencias a Key Vault pero no se definió AZURE_KEY_VAULT_URL, se lanza RuntimeError.
     monkeypatch.delenv("AZURE_KEY_VAULT_URL", raising=False)
 
     base_values = {"RAG__VECTOR_STORE__DSN": "from_key_vault/my-secret"}
@@ -92,6 +95,7 @@ def test_vault_config_source_requires_vault_url_when_references_exist(monkeypatc
 
 
 def test_vault_config_source_raises_when_secret_not_found(monkeypatch) -> None:
+    # Verifica que si el secreto referenciado no existe en Key Vault, se lanza RuntimeError con el nombre del secreto.
     base_values = {"RAG__VECTOR_STORE__DSN": "from_key_vault/missing-secret"}
     source = _make_source_with_fake_client(base_values, vault_values={}, monkeypatch=monkeypatch)
 

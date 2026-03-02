@@ -17,6 +17,7 @@ def _runtime() -> SimpleNamespace:
 
 @pytest.mark.asyncio
 async def test_setup_chat_node_returns_same_state() -> None:
+    # Verifica que el nodo de configuración inicial actúa como función identidad y devuelve el mismo estado.
     node = SetupChatNode()
     state = {"messages": []}
 

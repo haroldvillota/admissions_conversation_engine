@@ -37,6 +37,7 @@ def _tenant_config() -> TenantConfig:
 
 
 def test_parse_allowed_languages_strips_values() -> None:
+    # Verifica que la lista de idiomas permitidos se parsea correctamente eliminando espacios extra.
     node = LlmLanguageDetectorNode(
         llm=_llm_with_content('{"language":"es-ES","confidence":0.9}'),
         prompt="detector",
@@ -50,6 +51,7 @@ def test_parse_allowed_languages_strips_values() -> None:
 
 @pytest.mark.asyncio
 async def test_language_detector_returns_detected_language_and_clamped_confidence() -> None:
+    # Verifica que el idioma detectado se devuelve con la confianza limitada al rango [0.0, 1.0].
     node = LlmLanguageDetectorNode(
         llm=_llm_with_content('{"language":"es-ES","confidence":1.7}'),
         prompt="detector",
@@ -64,6 +66,7 @@ async def test_language_detector_returns_detected_language_and_clamped_confidenc
 
 @pytest.mark.asyncio
 async def test_language_detector_uses_fallback_for_invalid_json() -> None:
+    # Verifica que ante una respuesta JSON inválida del LLM, se usa el idioma de respaldo con confianza 0.
     node = LlmLanguageDetectorNode(
         llm=_llm_with_content("not-json"),
         prompt="detector",
@@ -78,6 +81,7 @@ async def test_language_detector_uses_fallback_for_invalid_json() -> None:
 
 @pytest.mark.asyncio
 async def test_language_detector_uses_fallback_for_language_outside_allowed_list() -> None:
+    # Verifica que si el idioma detectado no está en la lista permitida, se usa el idioma de respaldo.
     node = LlmLanguageDetectorNode(
         llm=_llm_with_content('{"language":"fr-FR","confidence":0.8}'),
         prompt="detector",
@@ -92,6 +96,7 @@ async def test_language_detector_uses_fallback_for_language_outside_allowed_list
 
 @pytest.mark.asyncio
 async def test_language_detector_defaults_confidence_to_zero_when_invalid() -> None:
+    # Verifica que si el valor de confianza no es numérico, se usa 0.0 como valor por defecto.
     node = LlmLanguageDetectorNode(
         llm=_llm_with_content('{"language":"es-ES","confidence":"not-a-number"}'),
         prompt="detector",

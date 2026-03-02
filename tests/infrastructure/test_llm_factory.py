@@ -3,6 +3,7 @@ from admissions_conversation_engine.infrastructure.llm_factory import LLMFactory
 
 
 def test_llm_factory_build_llm_uses_model_and_api_key(monkeypatch) -> None:
+    # Verifica que LLMFactory construye el modelo de chat pasando el nombre de modelo y la API key del perfil.
     captured = {}
 
     def fake_init_chat_model(model, api_key=None):

@@ -24,6 +24,7 @@ def _llm_with_content(content: str) -> RunnableLambda:
 
 @pytest.mark.asyncio
 async def test_guardrail_allows_request_when_llm_returns_allowed_true() -> None:
+    # Verifica que el guardrail permite la solicitud cuando el LLM responde con allowed=true.
     node = GuardrailNode(
         llm=_llm_with_content('{"allowed": true, "reason": "OK", "safe_reply": ""}'),
         prompt="guardrail",
@@ -37,6 +38,7 @@ async def test_guardrail_allows_request_when_llm_returns_allowed_true() -> None:
 
 @pytest.mark.asyncio
 async def test_guardrail_blocks_request_with_safe_reply() -> None:
+    # Verifica que el guardrail bloquea la solicitud y devuelve el mensaje seguro cuando allowed=false.
     node = GuardrailNode(
         llm=_llm_with_content(
             '{"allowed": false, "reason": "PROHIBITED_TOPIC", "safe_reply": "No puedo ayudarte con eso."}'
@@ -54,6 +56,7 @@ async def test_guardrail_blocks_request_with_safe_reply() -> None:
 
 @pytest.mark.asyncio
 async def test_guardrail_uses_fail_safe_when_llm_returns_invalid_json() -> None:
+    # Verifica que ante una respuesta invalida del LLM, el guardrail aplica fail-safe y bloquea la solicitud.
     node = GuardrailNode(
         llm=_llm_with_content("not-json"),
         prompt="guardrail",
@@ -64,4 +67,4 @@ async def test_guardrail_uses_fail_safe_when_llm_returns_invalid_json() -> None:
 
     assert result["guardrail_allowed"] is False
     assert result["guardrail_reason"] == "INJECTION"
-    assert result["messages"][0].content == "I’m sorry, I can’t help with that request."
+    assert result["messages"][0].content == "I\u2019m sorry, I can\u2019t help with that request."

@@ -90,11 +90,17 @@ def _app_config() -> AppConfig:
                 "language_fallback": "en-US",
                 "allowed_languages": "es-ES,en-US",
             },
+            "auth": {
+                "jwt_secret_key": "test-secret-key",
+                "jwt_algorithm": "HS256",
+                "jwt_expire_minutes": 60,
+            },
         }
     )
 
 
 def test_agent_builder_builds_graph_with_expected_nodes_and_compiles(monkeypatch) -> None:
+    # Verifica que AgentBuilder construye el grafo con los 9 nodos esperados y lo compila con el checkpointer.
     class FakeLLM:
         def __init__(self, model: str):
             self.model = model
@@ -165,6 +171,7 @@ def test_agent_builder_builds_graph_with_expected_nodes_and_compiles(monkeypatch
 
 
 def test_agent_builder_fetches_all_prompts_from_langfuse(monkeypatch) -> None:
+    # Verifica que AgentBuilder solicita los 6 prompts esperados al cliente de Langfuse cuando está disponible.
     class FakeLLM:
         def bind_tools(self, _tools):
             return self

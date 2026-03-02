@@ -21,3 +21,6 @@ check:
 
 migrate:
 	uv run alembic upgrade head
+
+server:
+	uv run uvicorn admissions_conversation_engine.entrypoints.api:app --reload

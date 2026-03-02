@@ -32,7 +32,7 @@ dependencies = [
 
 [project.scripts]
 cli = "admissions_conversation_engine.entrypoints.cli:main"
-api = "api:main"
+api = "admissions_conversation_engine.entrypoints.api:main"
 
 [build-system]
 requires = ["hatchling"]

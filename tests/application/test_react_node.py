@@ -24,6 +24,7 @@ def _llm_with_content(content: str) -> RunnableLambda:
 
 @pytest.mark.asyncio
 async def test_react_node_returns_ai_message_in_messages_key() -> None:
+    # Verifica que el nodo ReAct devuelve la respuesta del LLM en la clave "messages" del estado.
     node = ReactNode(
         llm=_llm_with_content("Respuesta del asistente"),
         prompt="system prompt",
@@ -38,6 +39,7 @@ async def test_react_node_returns_ai_message_in_messages_key() -> None:
 
 @pytest.mark.asyncio
 async def test_react_node_uses_knowledge_tool_context() -> None:
+    # Verifica que el nodo ReAct inyecta el contexto recuperado de la herramienta de conocimiento en el prompt.
     captured = {"messages": None}
 
     def fake_llm(inputs):

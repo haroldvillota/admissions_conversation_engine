@@ -26,6 +26,7 @@ def _rag_config() -> RagConfig:
 
 
 def test_rag_postgres_tool_returns_joined_page_content(monkeypatch) -> None:
+    # Verifica que la búsqueda síncrona devuelve los contenidos de documentos concatenados con doble salto de línea.
     class FakeDoc:
         def __init__(self, page_content: str):
             self.page_content = page_content
@@ -95,6 +96,7 @@ def test_rag_postgres_tool_returns_joined_page_content(monkeypatch) -> None:
 
 @pytest.mark.asyncio
 async def test_rag_postgres_tool_arun_returns_joined_page_content(monkeypatch) -> None:
+    # Verifica que la búsqueda asíncrona devuelve los contenidos de documentos concatenados con doble salto de línea.
     class FakeDoc:
         def __init__(self, page_content: str):
             self.page_content = page_content
@@ -152,6 +154,7 @@ async def test_rag_postgres_tool_arun_returns_joined_page_content(monkeypatch) -
 
 
 def test_rag_postgres_tool_returns_empty_string_for_blank_query() -> None:
+    # Verifica que una consulta en blanco devuelve cadena vacía sin realizar búsqueda.
     tool = PostgresVectorStoreTool(rag_config=_rag_config())
 
     result = tool._run("   ")
@@ -160,6 +163,7 @@ def test_rag_postgres_tool_returns_empty_string_for_blank_query() -> None:
 
 
 def test_rag_postgres_tool_raises_for_unsupported_vector_store_kind() -> None:
+    # Verifica que se lanza ValueError cuando el tipo de vector store configurado no es soportado.
     config = _rag_config().model_copy(
         update={
             "vector_store": _rag_config().vector_store.model_copy(update={"kind": "memory"}),

@@ -80,6 +80,11 @@ def _valid_nested_raw_values() -> dict:
             "language_fallback": "en-US",
             "allowed_languages": "es-ES,en-US",
         },
+        "auth": {
+            "jwt_secret_key": "test-secret-key",
+            "jwt_algorithm": "HS256",
+            "jwt_expire_minutes": 60,
+        },
     }
 
 def _flatten_nested_to_env(values: dict, *, prefix: str = "") -> dict:
@@ -95,6 +100,7 @@ def _flatten_nested_to_env(values: dict, *, prefix: str = "") -> dict:
 
 
 def test_load_app_config_fills_missing_llm_values_from_default() -> None:
+    # Verifica que los perfiles LLM sin API key ni modelo heredan esos valores del perfil por defecto.
     bootstrapper = AppConfigBootstrapper(config_source=StaticConfigSource(_valid_nested_raw_values()))
 
     app_config = bootstrapper.load_app_config()
@@ -105,6 +111,7 @@ def test_load_app_config_fills_missing_llm_values_from_default() -> None:
     assert app_config.llm.translator.model == "gpt-4.1-mini"
 
 def test_load_app_config_uses_llm_default_api_key_as_rag_embeddings_fallback_nested() -> None:
+    # Verifica que si la API key de embeddings no está definida, se usa la API key del LLM por defecto (config anidada).
     values = _valid_nested_raw_values()
     del values["rag"]["embeddings"]["api_key"]
     bootstrapper = AppConfigBootstrapper(config_source=StaticConfigSource(values))
@@ -115,6 +122,7 @@ def test_load_app_config_uses_llm_default_api_key_as_rag_embeddings_fallback_nes
 
 
 def test_load_app_config_uses_llm_default_api_key_as_rag_embeddings_fallback_env_form(monkeypatch) -> None:
+    # Verifica que si la API key de embeddings no está en variables de entorno, se usa la del LLM por defecto.
     env_values = _flatten_nested_to_env(_valid_nested_raw_values())
     env_values.pop("RAG__EMBEDDINGS__API_KEY", None)
 
@@ -129,6 +137,7 @@ def test_load_app_config_uses_llm_default_api_key_as_rag_embeddings_fallback_env
 
 
 def test_load_app_config_raises_runtime_error_for_invalid_config() -> None:
+    # Verifica que una configuración inválida (proveedor LLM desconocido) lanza RuntimeError con mensaje descriptivo.
     invalid_values = _valid_nested_raw_values()
     invalid_values["llm"]["default"]["provider"] = "invalid-provider"
     bootstrapper = AppConfigBootstrapper(config_source=StaticConfigSource(invalid_values))
@@ -141,6 +150,7 @@ def test_load_app_config_raises_runtime_error_for_invalid_config() -> None:
 
 
 def test_fill_llm_profiles_from_default_config_keeps_profile_specific_values() -> None:
+    # Verifica que los valores específicos de un perfil LLM (como el modelo) no son sobreescritos por el perfil por defecto.
     app_config = AppConfig(
         rag=_valid_nested_raw_values()["rag"],
         llm=LlmConfig(
@@ -172,6 +182,7 @@ def test_fill_llm_profiles_from_default_config_keeps_profile_specific_values() -
         checkpointer=_valid_nested_raw_values()["checkpointer"],
         observability=_valid_nested_raw_values()["observability"],
         tenant=_valid_nested_raw_values()["tenant"],
+        auth=_valid_nested_raw_values()["auth"],
     )
 
     updated = AppConfigBootstrapper._fill_llm_profiles_from_default_config(app_config)

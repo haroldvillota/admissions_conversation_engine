@@ -19,10 +19,10 @@ async def chat(
     body: ChatRequest,
     _: dict = Depends(get_current_token),
 ) -> ChatResponse:
-    """Send a message to the agent and receive the full response.
+    """Envia un mensaje al agente y recibe la respuesta completa.
 
-    The `chat_id` acts as the conversation thread identifier — reuse the same
-    value across calls to continue an existing conversation.
+    El `chat_id` actua como identificador del hilo de conversacion: reutiliza el mismo
+    valor entre llamadas para continuar una conversacion existente.
     """
     context = {
         "chat_id": body.chat_id,
@@ -62,10 +62,10 @@ async def chat_stream(
     body: ChatRequest,
     _: dict = Depends(get_current_token),
 ) -> StreamingResponse:
-    """Send a message to the agent and receive the response as a token stream.
+    """Envia un mensaje al agente y recibe la respuesta como flujo de tokens.
 
-    Streams raw text tokens via `text/plain` as they are produced by the LLM.
-    The `chat_id` acts as the conversation thread identifier.
+    Transmite tokens de texto sin procesar via `text/plain` a medida que los produce el LLM.
+    El `chat_id` actua como identificador del hilo de conversacion.
     """
     context = {
         "chat_id": body.chat_id,

@@ -52,7 +52,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Admissions Conversation Engine API",
-    description="REST API that exposes the admissions conversational agent.",
+    description="API REST que expone el agente conversacional de admissions optimizer.",
     version="0.1.0",
     lifespan=lifespan,
 )

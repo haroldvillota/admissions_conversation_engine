@@ -20,7 +20,7 @@ router = APIRouter(prefix="/a2a", tags=["A2A"])
 
 
 async def _execute_task(task_id: str, body: A2ATaskRequest, app_state) -> None:
-    """Run the agent graph for an A2A task and update the task store on completion."""
+    """Ejecuta el grafo del agente para una tarea A2A y actualiza el almacén de tareas al finalizar."""
     app_state.tasks[task_id] = app_state.tasks[task_id].model_copy(
         update={"status": A2ATaskStatus.running}
     )
@@ -73,10 +73,10 @@ async def create_task(
     body: A2ATaskRequest,
     _: dict = Depends(get_current_token),
 ) -> A2ATask:
-    """Submit an A2A task for asynchronous processing.
+    """Envía una tarea A2A para procesamiento asíncrono.
 
-    Returns immediately (HTTP 202) with the initial task record.
-    Poll `GET /a2a/tasks/{task_id}` to retrieve the result once the task completes.
+    Devuelve de inmediato (HTTP 202) el registro inicial de la tarea.
+    Consulta `GET /a2a/tasks/{task_id}` para obtener el resultado cuando la tarea finalice.
     """
     task_id = str(uuid.uuid4())
     task = A2ATask(
@@ -95,7 +95,7 @@ async def get_task(
     request: Request,
     _: dict = Depends(get_current_token),
 ) -> A2ATask:
-    """Retrieve the current status and result of an A2A task."""
+    """Obtiene el estado actual y el resultado de una tarea A2A."""
     task = request.app.state.tasks.get(task_id)
     if task is None:
         raise HTTPException(status_code=404, detail=f"Task '{task_id}' not found")
@@ -106,12 +106,12 @@ async def get_task(
 async def get_capabilities(
     _: dict = Depends(get_current_token),
 ) -> A2ACapabilities:
-    """Describe the capabilities exposed by this agent for A2A integration."""
+    """Describe las capacidades que expone este agente para la integración A2A."""
     return A2ACapabilities(
         name="Admissions Conversation Engine",
         description=(
-            "Conversational agent that handles university admissions inquiries "
-            "across multiple case scenarios using RAG-powered responses."
+            "Agente conversacional que gestiona consultas de admisiones universitarias "
+            "en multiples escenarios de caso usando respuestas impulsadas por RAG."
         ),
         version="0.1.0",
         supported_cases=["off_hours", "low_scoring", "overflow", "max_retries"],

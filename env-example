@@ -37,6 +37,13 @@ TENANT__TONE="Siempre utiliza la segunda persona singular (\"tú\"), manteniendo
 TENANT__LANGUAGE_FALLBACK="en-US"
 TENANT__ALLOWED_LANGUAGES="es-ES,en-US"
 
+# Authentication (JWT)
+# AUTH__JWT_SECRET_KEY must be a long, random secret — never commit a real value.
+# Generate one with: python -c "import secrets; print(secrets.token_hex(32))"
+AUTH__JWT_SECRET_KEY="change-me-use-a-strong-random-secret"
+AUTH__JWT_ALGORITHM="HS256"
+AUTH__JWT_EXPIRE_MINUTES="60"
+
 # Required when any variable uses the from_key_vault/<secret-name> syntax
 AZURE_KEY_VAULT_URL="https://<vault-name>.vault.azure.net/"
 

@@ -67,6 +67,14 @@ class ObservabilityConfig(BaseModel):
     base_url: str | None = None
 
 
+class AuthConfig(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    jwt_secret_key: str
+    jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = 60
+
+
 class AppConfig(BaseSettings):
     model_config = SettingsConfigDict(
         frozen=True,
@@ -79,6 +87,7 @@ class AppConfig(BaseSettings):
     checkpointer: CheckpointerConfig
     observability: ObservabilityConfig
     tenant: TenantConfig
+    auth: AuthConfig
 
     def __str__(self) -> str:
         return self.model_dump_json(indent=2, ensure_ascii=False)

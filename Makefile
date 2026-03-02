@@ -22,5 +22,8 @@ check:
 migrate:
 	uv run alembic upgrade head
 
-server:
+api:
 	uv run uvicorn admissions_conversation_engine.entrypoints.api:app --reload
+
+token:
+	python3 -c 'import os; from jose import jwt; print(jwt.encode({"sub":"agent-x"}, os.environ["AUTH__JWT_SECRET_KEY"], algorithm="HS256"))'

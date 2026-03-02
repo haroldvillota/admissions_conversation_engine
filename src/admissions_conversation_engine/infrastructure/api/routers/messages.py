@@ -10,7 +10,7 @@ from langchain_core.runnables import RunnableConfig
 from ..dependencies import get_current_token
 from ..schemas import ChatRequest, ChatResponse
 
-router = APIRouter(prefix="/chat", tags=["Agent"])
+router = APIRouter(prefix="/messages", tags=["Agent"])
 
 
 @router.post("", response_model=ChatResponse)

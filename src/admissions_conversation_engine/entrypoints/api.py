@@ -12,7 +12,7 @@ from admissions_conversation_engine.infrastructure.postgres_checkpointer_manager
 )
 
 from admissions_conversation_engine.infrastructure.api.routers.a2a import router as a2a_router
-from admissions_conversation_engine.infrastructure.api.routers.chat import router as chat_router
+from admissions_conversation_engine.infrastructure.api.routers.messages import router as messages_router
 
 
 # --------------------------------------------------------------------------- #
@@ -57,7 +57,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(chat_router)
+app.include_router(messages_router)
 app.include_router(a2a_router)
 
 

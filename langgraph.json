@@ -3,6 +3,5 @@
   "graphs": {
     "agent": "./src/admissions_conversation_engine/entrypoints/graph.py:graph"
   },
-  "env": ".env",
   "image_distro": "wolfi"
 }

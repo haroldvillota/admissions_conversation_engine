@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import logging
 
 from langfuse import Langfuse, get_client
 from langfuse.langchain import CallbackHandler
@@ -20,9 +21,11 @@ def build_langfuse_client(app_config: AppConfig) -> tuple[Langfuse, CallbackHand
     langfuse = get_client()
     observability_handler = CallbackHandler()
 
+    logger = logging.getLogger(__name__)
+
     if langfuse.auth_check():
-        print("Langfuse client is authenticated and ready!")
+        logger.info("Langfuse client is authenticated and ready!")
     else:
-        print("Authentication failed. Please check your credentials and host.")
+        logger.error("Authentication failed. Please check your credentials and host.")
 
     return langfuse, observability_handler

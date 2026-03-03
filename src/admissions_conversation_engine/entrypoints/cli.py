@@ -1,6 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+import logging
+import sys
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
 
 from admissions_conversation_engine.infrastructure.langfuse_factory import (
     build_langfuse_client,

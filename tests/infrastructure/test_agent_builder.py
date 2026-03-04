@@ -111,12 +111,17 @@ def test_agent_builder_builds_graph_with_expected_nodes_and_compiles(monkeypatch
     class FakeLLMFactory:
         def __init__(self, profile):
             self._profile = profile
+            self._llm = None
 
-        def probe_connection(self) -> None:
+        def build(self):
+            self._llm = FakeLLM(self._profile.model)
+            return self
+
+        def health_check(self) -> None:
             pass
 
-        def build_llm(self):
-            return FakeLLM(self._profile.model)
+        def get_llm(self):
+            return self._llm
 
     class FakePromptProvider:
         def __init__(self, langfuse_client, tenant):
@@ -185,13 +190,18 @@ def test_agent_builder_fetches_all_prompts_from_langfuse(monkeypatch) -> None:
 
     class FakeLLMFactory:
         def __init__(self, profile):
+            self._llm = None
+            self._profile = profile
+
+        def build(self):
+            self._llm = FakeLLM()
+            return self
+
+        def health_check(self) -> None:
             pass
 
-        def probe_connection(self) -> None:
-            pass
-
-        def build_llm(self):
-            return FakeLLM()
+        def get_llm(self):
+            return self._llm
 
     class FakeLangfusePrompt:
         def __init__(self, name):

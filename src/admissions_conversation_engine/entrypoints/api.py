@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -14,6 +15,8 @@ from admissions_conversation_engine.infrastructure.postgres_checkpointer_manager
 from admissions_conversation_engine.infrastructure.api.routers.a2a import router as a2a_router
 from admissions_conversation_engine.infrastructure.api.routers.messages import router as messages_router
 
+logger = logging.getLogger(__name__)
+
 
 # --------------------------------------------------------------------------- #
 # Lifespan
@@ -22,18 +25,22 @@ from admissions_conversation_engine.infrastructure.api.routers.messages import r
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app_config = get_app_config()
-    langfuse, handler = build_langfuse_client(app_config)
+    try:
+        app_config = get_app_config()
+        langfuse, handler = build_langfuse_client(app_config)
 
-    checkpointer_manager = PostgresCheckpointerManager(app_config.checkpointer)
-    checkpointer = await checkpointer_manager.aget_checkpointer()
+        checkpointer_manager = PostgresCheckpointerManager(app_config.checkpointer)
+        checkpointer = await checkpointer_manager.aget_checkpointer()
 
-    builder = AgentBuilder(
-        app_config=app_config,
-        checkpointer=checkpointer,
-        langfuse_client=langfuse,
-    )
-    compiled = builder.build()
+        builder = AgentBuilder(
+            app_config=app_config,
+            checkpointer=checkpointer,
+            langfuse_client=langfuse,
+        )
+        compiled = builder.build()
+    except Exception as exc:
+        logger.critical("La aplicación no pudo iniciar: %s", exc)
+        raise
 
     app.state.graph = compiled.with_config({"callbacks": [handler]})
     app.state.observability_handler = handler

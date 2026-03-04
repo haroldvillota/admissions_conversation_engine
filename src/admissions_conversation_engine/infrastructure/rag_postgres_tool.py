@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+import logging
+
+import psycopg
 from langchain_core.tools import BaseTool
 from langchain_openai import OpenAIEmbeddings
 from langchain_postgres import PGEngine, PGVectorStore
@@ -9,6 +12,9 @@ from admissions_conversation_engine.infrastructure.config.app_config import RagC
 
 from typing import Optional
 from pydantic import Field
+
+logger = logging.getLogger(__name__)
+
 
 class PostgresVectorStoreTool(BaseTool):
     name: str = "search_admissions"
@@ -19,6 +25,21 @@ class PostgresVectorStoreTool(BaseTool):
     rag_config: RagConfig = Field(...)
     _engine: Optional[PGEngine] = None
     _vector_store: Optional[PGVectorStore] = None
+
+    def probe_connection(self) -> None:
+        """Verifica que la base de datos PostgreSQL del vector store sea alcanzable.
+
+        Lanza RuntimeError con un mensaje descriptivo si la conexión falla,
+        para que los entrypoints puedan detener la aplicación de forma temprana.
+        """
+        dsn = self.rag_config.vector_store.dsn
+        try:
+            with psycopg.connect(dsn) as conn:
+                conn.execute("SELECT 1")
+        except Exception as exc:
+            raise RuntimeError(
+                f"Vector store PostgreSQL no disponible (DSN: '{dsn}'): {exc}"
+            ) from exc
 
     def _run(self, query: str) -> str:
         if not query.strip():

@@ -176,3 +176,44 @@ def test_rag_postgres_tool_raises_for_unsupported_vector_store_kind() -> None:
         assert False, "Expected ValueError for unsupported vector store kind"
     except ValueError as error:
         assert "Unsupported vector store kind" in str(error)
+
+
+def test_probe_connection_succeeds_when_database_is_reachable(monkeypatch) -> None:
+    # Verifica que probe_connection no lanza excepción cuando la conexión es exitosa.
+    class FakeConn:
+        def execute(self, query: str) -> None:
+            pass
+
+        def __enter__(self) -> "FakeConn":
+            return self
+
+        def __exit__(self, *args: object) -> None:
+            pass
+
+    monkeypatch.setattr(
+        "admissions_conversation_engine.infrastructure.rag_postgres_tool.psycopg.connect",
+        lambda dsn: FakeConn(),
+    )
+
+    tool = PostgresVectorStoreTool(rag_config=_rag_config())
+    tool.probe_connection()  # No debe lanzar
+
+
+def test_probe_connection_raises_runtime_error_when_database_is_unreachable(monkeypatch) -> None:
+    # Verifica que probe_connection lanza RuntimeError con mensaje claro cuando la conexión falla.
+    def fake_connect(dsn: str) -> None:
+        raise Exception("Connection refused")
+
+    monkeypatch.setattr(
+        "admissions_conversation_engine.infrastructure.rag_postgres_tool.psycopg.connect",
+        fake_connect,
+    )
+
+    tool = PostgresVectorStoreTool(rag_config=_rag_config())
+
+    try:
+        tool.probe_connection()
+        assert False, "Expected RuntimeError"
+    except RuntimeError as error:
+        assert "Vector store PostgreSQL no disponible" in str(error)
+        assert "Connection refused" in str(error)

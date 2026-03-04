@@ -58,6 +58,7 @@ class AgentBuilder:
         search_tool = PostgresVectorStoreTool(
             rag_config=self.app_config.rag,
         )
+        search_tool.probe_connection()
 
         llm_with_tool = llm.bind_tools([search_tool])
 

@@ -18,6 +18,9 @@ if not dsn:
         "RAG__VECTOR_STORE__DSN environment variable is not set"
     )
 
+if dsn.startswith("postgresql://"):
+    dsn = dsn.replace("postgresql://", "postgresql+psycopg://", 1)
+
 config.set_main_option("sqlalchemy.url", dsn)
 
 # Interpret the config file for Python logging.

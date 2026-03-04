@@ -1,12 +1,9 @@
-import os
 from typing import List
 
 from langgraph.runtime import Runtime
 
 from admissions_conversation_engine.domain.agent_state import AgentState, ContextSchema
 from admissions_conversation_engine.domain.tenant_config import TenantConfig
-
-_FASTTEXT_MODEL_PATH_DEFAULT = "/app/models/lid.176.ftz"
 
 
 class FasttextLanguageDetectorNode:
@@ -15,13 +12,12 @@ class FasttextLanguageDetectorNode:
     No realiza llamadas a ningún LLM externo.
     """
 
-    def __init__(self, config: TenantConfig, model_path: str | None = None) -> None:
+    def __init__(self, config: TenantConfig, model_path: str) -> None:
         import fasttext
 
         self._config = config
-        path = model_path or os.getenv("FASTTEXT_MODEL_PATH", _FASTTEXT_MODEL_PATH_DEFAULT)
         fasttext.FastText.eprint = lambda x: None  # silencia warnings de fasttext
-        self._model = fasttext.load_model(path)
+        self._model = fasttext.load_model(model_path)
 
     def _parse_allowed_languages(self) -> List[str]:
         if not self._config.allowed_languages:

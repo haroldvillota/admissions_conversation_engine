@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from typing import Any
 
 from langgraph.graph import END, START, StateGraph
@@ -81,15 +80,18 @@ class AgentBuilder:
         
         graph.add_node("setup", SetupChatNode())
 
-        language_detector_method = os.getenv("LANGUAGE_DETECTOR_METHOD", "fasttext")
-        if language_detector_method == "llm":
+        ld_config = self.app_config.language_detector
+        if ld_config.method == "llm":
             language_detector = LlmLanguageDetectorNode(
                 translator_llm,
                 prompts.language_detector,
                 self.app_config.tenant,
             )
         else:
-            language_detector = FasttextLanguageDetectorNode(self.app_config.tenant)
+            language_detector = FasttextLanguageDetectorNode(
+                self.app_config.tenant,
+                model_path=ld_config.fasttext_model_path,
+            )
 
         graph.add_node("language_detector", language_detector)
         graph.add_node("guardrail", GuardrailNode(guardrail_llm, prompts.guardrail))

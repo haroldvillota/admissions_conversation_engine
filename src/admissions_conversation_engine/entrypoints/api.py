@@ -30,6 +30,7 @@ async def lifespan(app: FastAPI):
         langfuse, handler = build_langfuse_client(app_config)
 
         checkpointer_manager = PostgresCheckpointerManager(app_config.checkpointer)
+        await checkpointer_manager.aprobe_connection()
         checkpointer = await checkpointer_manager.aget_checkpointer()
 
         builder = AgentBuilder(

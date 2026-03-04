@@ -247,3 +247,87 @@ async def test_ashutdown_does_nothing_when_async_pool_is_none() -> None:
     # Verifica que ashutdown() no lanza error si no se creó ningún pool asíncrono previamente.
     manager = PostgresCheckpointerManager(_checkpointer_config())
     await manager.ashutdown()  # debe ejecutarse sin error
+
+
+def test_probe_connection_succeeds_when_database_is_reachable(monkeypatch) -> None:
+    # Verifica que probe_connection no lanza excepción cuando la conexión sincrónica es exitosa.
+    import admissions_conversation_engine.infrastructure.postgres_checkpointer_manager as mod
+
+    class FakeConn:
+        def execute(self, query: str) -> None:
+            pass
+
+        def __enter__(self) -> "FakeConn":
+            return self
+
+        def __exit__(self, *args: object) -> None:
+            pass
+
+    monkeypatch.setattr(mod.psycopg, "connect", lambda dsn: FakeConn())
+
+    manager = PostgresCheckpointerManager(_checkpointer_config())
+    manager.probe_connection()  # No debe lanzar
+
+
+def test_probe_connection_raises_runtime_error_when_database_is_unreachable(monkeypatch) -> None:
+    # Verifica que probe_connection lanza RuntimeError con mensaje claro cuando la conexión sincrónica falla.
+    import admissions_conversation_engine.infrastructure.postgres_checkpointer_manager as mod
+
+    monkeypatch.setattr(mod.psycopg, "connect", lambda dsn: (_ for _ in ()).throw(Exception("Connection refused")))
+
+    manager = PostgresCheckpointerManager(_checkpointer_config())
+
+    try:
+        manager.probe_connection()
+        assert False, "Expected RuntimeError"
+    except RuntimeError as error:
+        assert "Checkpointer PostgreSQL no disponible" in str(error)
+        assert "Connection refused" in str(error)
+
+
+@pytest.mark.asyncio
+async def test_aprobe_connection_succeeds_when_database_is_reachable(monkeypatch) -> None:
+    # Verifica que aprobe_connection no lanza excepción cuando la conexión asíncrona es exitosa.
+    import admissions_conversation_engine.infrastructure.postgres_checkpointer_manager as mod
+
+    class FakeAsyncConn:
+        async def execute(self, query: str) -> None:
+            pass
+
+        async def __aenter__(self) -> "FakeAsyncConn":
+            return self
+
+        async def __aexit__(self, *args: object) -> None:
+            pass
+
+    class FakeAsyncConnection:
+        @staticmethod
+        async def connect(dsn: str) -> FakeAsyncConn:
+            return FakeAsyncConn()
+
+    monkeypatch.setattr(mod.psycopg, "AsyncConnection", FakeAsyncConnection)
+
+    manager = PostgresCheckpointerManager(_checkpointer_config())
+    await manager.aprobe_connection()  # No debe lanzar
+
+
+@pytest.mark.asyncio
+async def test_aprobe_connection_raises_runtime_error_when_database_is_unreachable(monkeypatch) -> None:
+    # Verifica que aprobe_connection lanza RuntimeError con mensaje claro cuando la conexión asíncrona falla.
+    import admissions_conversation_engine.infrastructure.postgres_checkpointer_manager as mod
+
+    class FakeAsyncConnection:
+        @staticmethod
+        async def connect(dsn: str) -> None:
+            raise Exception("Connection refused")
+
+    monkeypatch.setattr(mod.psycopg, "AsyncConnection", FakeAsyncConnection)
+
+    manager = PostgresCheckpointerManager(_checkpointer_config())
+
+    try:
+        await manager.aprobe_connection()
+        assert False, "Expected RuntimeError"
+    except RuntimeError as error:
+        assert "Checkpointer PostgreSQL no disponible" in str(error)
+        assert "Connection refused" in str(error)

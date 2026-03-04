@@ -34,6 +34,7 @@ class ConsoleConversationRunner:
         self._app_config = app_config
 
     async def run(self) -> None:
+        await self.checkpointerManager.aprobe_connection()
         self.checkpointer = await self.checkpointerManager.aget_checkpointer()
 
         builder = AgentBuilder(

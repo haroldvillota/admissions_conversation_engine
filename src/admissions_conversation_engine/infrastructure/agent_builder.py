@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import Any
 
 from langgraph.graph import END, START, StateGraph
@@ -26,6 +27,10 @@ from admissions_conversation_engine.application.guardrail_node import (
 
 from admissions_conversation_engine.application.llm_language_detector_node import (
     LlmLanguageDetectorNode,
+)
+
+from admissions_conversation_engine.application.fasttext_language_detector_node import (
+    FasttextLanguageDetectorNode,
 )
 
 from admissions_conversation_engine.application.case_router_node import (
@@ -75,14 +80,18 @@ class AgentBuilder:
         graph = StateGraph(AgentState, context_schema=ContextSchema)
         
         graph.add_node("setup", SetupChatNode())
-        graph.add_node(
-            "language_detector",
-            LlmLanguageDetectorNode(
+
+        language_detector_method = os.getenv("LANGUAGE_DETECTOR_METHOD", "fasttext")
+        if language_detector_method == "llm":
+            language_detector = LlmLanguageDetectorNode(
                 translator_llm,
                 prompts.language_detector,
                 self.app_config.tenant,
-            ),
-        )
+            )
+        else:
+            language_detector = FasttextLanguageDetectorNode(self.app_config.tenant)
+
+        graph.add_node("language_detector", language_detector)
         graph.add_node("guardrail", GuardrailNode(guardrail_llm, prompts.guardrail))
         graph.add_node("case_router", CaseRouterNode())
 

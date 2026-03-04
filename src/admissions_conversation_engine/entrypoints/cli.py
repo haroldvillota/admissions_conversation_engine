@@ -34,7 +34,9 @@ class ConsoleConversationRunner:
         self._app_config = app_config
 
     async def run(self) -> None:
+        logger = logging.getLogger(__name__)
         await self.checkpointerManager.aprobe_connection()
+        logger.info("Checkpointer ready!")
         self.checkpointer = await self.checkpointerManager.aget_checkpointer()
 
         builder = AgentBuilder(

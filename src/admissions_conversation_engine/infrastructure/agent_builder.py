@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+import logging
 
 from langgraph.graph import END, START, StateGraph
 
@@ -54,25 +55,30 @@ class AgentBuilder:
     langfuse_client: Langfuse
 
     def build(self) -> Any:
+        logger = logging.getLogger(__name__)
 
         guardrail_factory = LLMFactory(self.app_config.llm.guardrail)
-        guardrail_factory.probe_connection()
-        guardrail_llm = guardrail_factory.build_llm()
+        guardrail_factory.build().health_check()
+        logger.info("Guardrail llm ready!")
+        guardrail_llm = guardrail_factory.get_llm()
 
         translator_factory = LLMFactory(self.app_config.llm.translator)
-        translator_factory.probe_connection()
-        translator_llm = translator_factory.build_llm()
+        logger.info("Translator llm ready!")
+        translator_factory.build().health_check()
+        translator_llm = translator_factory.get_llm()
 
         react_factory = LLMFactory(self.app_config.llm.react)
-        react_factory.probe_connection()
-        llm = react_factory.build_llm()
+        react_factory.build().health_check()
+        logger.info("React llm ready!")
+        react_llm = react_factory.get_llm()
 
         search_tool = PostgresVectorStoreTool(
             rag_config=self.app_config.rag,
         )
         search_tool.probe_connection()
+        logger.info("Vector Store ready!")
 
-        llm_with_tool = llm.bind_tools([search_tool])
+        llm_with_tool = react_llm.bind_tools([search_tool])
 
         prompts = PromptProvider(self.langfuse_client, self.app_config.tenant).get_formatted_prompts()
 

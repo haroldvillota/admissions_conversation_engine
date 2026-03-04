@@ -1,7 +1,7 @@
 from typing import List
 
 from langgraph.runtime import Runtime
-
+from pathlib import Path
 from admissions_conversation_engine.domain.agent_state import AgentState, ContextSchema
 from admissions_conversation_engine.domain.tenant_config import TenantConfig
 
@@ -17,7 +17,8 @@ class FasttextLanguageDetectorNode:
 
         self._config = config
         fasttext.FastText.eprint = lambda x: None  # silencia warnings de fasttext
-        self._model = fasttext.load_model(model_path)
+        PROJECT_ROOT = Path(__file__).resolve().parents[3]
+        self._model = fasttext.load_model(str(PROJECT_ROOT / model_path))
 
     def _parse_allowed_languages(self) -> List[str]:
         if not self._config.allowed_languages:

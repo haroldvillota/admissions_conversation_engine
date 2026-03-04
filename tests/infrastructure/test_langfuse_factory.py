@@ -68,6 +68,10 @@ def _app_config() -> AppConfig:
                 "jwt_algorithm": "HS256",
                 "jwt_expire_minutes": 60,
             },
+            "language_detector": {
+                "method": "llm",
+                "fasttext_model_path": "/models/lid.176.ftz",
+            },
         }
     )
 

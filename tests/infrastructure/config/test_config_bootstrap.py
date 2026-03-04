@@ -85,6 +85,10 @@ def _valid_nested_raw_values() -> dict:
             "jwt_algorithm": "HS256",
             "jwt_expire_minutes": 60,
         },
+        "language_detector": {
+            "method": "llm",
+            "fasttext_model_path": "/models/lid.176.ftz",
+        },
     }
 
 def _flatten_nested_to_env(values: dict, *, prefix: str = "") -> dict:
@@ -183,6 +187,7 @@ def test_fill_llm_profiles_from_default_config_keeps_profile_specific_values() -
         observability=_valid_nested_raw_values()["observability"],
         tenant=_valid_nested_raw_values()["tenant"],
         auth=_valid_nested_raw_values()["auth"],
+        language_detector=_valid_nested_raw_values()["language_detector"],
     )
 
     updated = AppConfigBootstrapper._fill_llm_profiles_from_default_config(app_config)

@@ -11,8 +11,8 @@ from admissions_conversation_engine.domain.tenant_config import TenantConfig
 class LanguageDetectorConfig(BaseModel):
     model_config = ConfigDict(frozen=True)
 
-    method: Literal["fasttext", "llm"] = "fasttext"
-    fasttext_model_path: str = "/app/models/lid.176.ftz"
+    method: Literal["fasttext", "llm"] = "llm"
+    fasttext_model_path: str = "/models/lid.176.ftz"
 
 
 class RagVectorStoreConfig(BaseModel):

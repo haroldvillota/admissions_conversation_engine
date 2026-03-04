@@ -28,6 +28,10 @@ from admissions_conversation_engine.application.llm_language_detector_node impor
     LlmLanguageDetectorNode,
 )
 
+from admissions_conversation_engine.application.fasttext_language_detector_node import (
+    FasttextLanguageDetectorNode,
+)
+
 from admissions_conversation_engine.application.case_router_node import (
     CaseRouterNode,
 )
@@ -75,14 +79,21 @@ class AgentBuilder:
         graph = StateGraph(AgentState, context_schema=ContextSchema)
         
         graph.add_node("setup", SetupChatNode())
-        graph.add_node(
-            "language_detector",
-            LlmLanguageDetectorNode(
+
+        ld_config = self.app_config.language_detector
+        if ld_config.method == "llm":
+            language_detector = LlmLanguageDetectorNode(
                 translator_llm,
                 prompts.language_detector,
                 self.app_config.tenant,
-            ),
-        )
+            )
+        else:
+            language_detector = FasttextLanguageDetectorNode(
+                self.app_config.tenant,
+                model_path=ld_config.fasttext_model_path,
+            )
+
+        graph.add_node("language_detector", language_detector)
         graph.add_node("guardrail", GuardrailNode(guardrail_llm, prompts.guardrail))
         graph.add_node("case_router", CaseRouterNode())
 

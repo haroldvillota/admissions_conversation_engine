@@ -62,11 +62,6 @@ class AgentBuilder:
         logger.info("Guardrail llm ready!")
         guardrail_llm = guardrail_factory.get_llm()
 
-        translator_factory = LLMFactory(self.app_config.llm.translator)
-        logger.info("Translator llm ready!")
-        translator_factory.build().health_check()
-        translator_llm = translator_factory.get_llm()
-
         react_factory = LLMFactory(self.app_config.llm.react)
         react_factory.build().health_check()
         logger.info("React llm ready!")
@@ -88,12 +83,17 @@ class AgentBuilder:
 
         ld_config = self.app_config.language_detector
         if ld_config.method == "llm":
+            language_detector_factory = LLMFactory(self.app_config.llm.translator)
+            logger.info("Language detector llm ready!")
+            language_detector_factory.build().health_check()
+            translator_llm = language_detector_factory.get_llm()
             language_detector = LlmLanguageDetectorNode(
                 translator_llm,
                 prompts.language_detector,
                 self.app_config.tenant,
             )
         else:
+            logger.info("Language detector local ready!")
             language_detector = FasttextLanguageDetectorNode(
                 self.app_config.tenant,
                 model_path=ld_config.fasttext_model_path,

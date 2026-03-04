@@ -41,6 +41,8 @@ AUTH__JWT_SECRET_KEY="change-me-use-a-strong-random-secret"
 AUTH__JWT_ALGORITHM="HS256"
 AUTH__JWT_EXPIRE_MINUTES="60"
 
+LANGUAGE_DETECTOR__METHOD="fasttext"
+
 # Required when any variable uses the from_key_vault/<secret-name> syntax
 USE_VAULT=1
 AZURE_KEY_VAULT_URL="https://<vault-name>.vault.azure.net/"

@@ -112,6 +112,9 @@ def test_agent_builder_builds_graph_with_expected_nodes_and_compiles(monkeypatch
         def __init__(self, profile):
             self._profile = profile
 
+        def probe_connection(self) -> None:
+            pass
+
         def build_llm(self):
             return FakeLLM(self._profile.model)
 
@@ -140,6 +143,10 @@ def test_agent_builder_builds_graph_with_expected_nodes_and_compiles(monkeypatch
     monkeypatch.setattr(
         "admissions_conversation_engine.infrastructure.agent_builder.PromptProvider",
         FakePromptProvider,
+    )
+    monkeypatch.setattr(
+        "admissions_conversation_engine.infrastructure.agent_builder.PostgresVectorStoreTool.probe_connection",
+        lambda self: None,
     )
 
     checkpointer = object()
@@ -178,6 +185,9 @@ def test_agent_builder_fetches_all_prompts_from_langfuse(monkeypatch) -> None:
 
     class FakeLLMFactory:
         def __init__(self, profile):
+            pass
+
+        def probe_connection(self) -> None:
             pass
 
         def build_llm(self):
@@ -226,6 +236,10 @@ def test_agent_builder_fetches_all_prompts_from_langfuse(monkeypatch) -> None:
     monkeypatch.setattr(
         "admissions_conversation_engine.infrastructure.prompt_provider.render_case_max_retries_prompt",
         lambda *_: "max-retries-prompt",
+    )
+    monkeypatch.setattr(
+        "admissions_conversation_engine.infrastructure.agent_builder.PostgresVectorStoreTool.probe_connection",
+        lambda self: None,
     )
 
     langfuse_client = FakeLangfuse()

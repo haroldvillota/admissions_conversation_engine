@@ -51,13 +51,22 @@ class AgentBuilder:
 
     def build(self) -> Any:
 
-        guardrail_llm = LLMFactory(self.app_config.llm.guardrail).build_llm()
-        translator_llm = LLMFactory(self.app_config.llm.translator).build_llm()
-        llm = LLMFactory(self.app_config.llm.react).build_llm()
-        
+        guardrail_factory = LLMFactory(self.app_config.llm.guardrail)
+        guardrail_factory.probe_connection()
+        guardrail_llm = guardrail_factory.build_llm()
+
+        translator_factory = LLMFactory(self.app_config.llm.translator)
+        translator_factory.probe_connection()
+        translator_llm = translator_factory.build_llm()
+
+        react_factory = LLMFactory(self.app_config.llm.react)
+        react_factory.probe_connection()
+        llm = react_factory.build_llm()
+
         search_tool = PostgresVectorStoreTool(
             rag_config=self.app_config.rag,
         )
+        search_tool.probe_connection()
 
         llm_with_tool = llm.bind_tools([search_tool])
 

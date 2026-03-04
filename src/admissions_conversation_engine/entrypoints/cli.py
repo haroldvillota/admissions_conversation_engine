@@ -34,7 +34,16 @@ class ConsoleConversationRunner:
         self._app_config = app_config
 
     async def run(self) -> None:
+        await self.checkpointerManager.aprobe_connection()
         self.checkpointer = await self.checkpointerManager.aget_checkpointer()
+
+        builder = AgentBuilder(
+            app_config=self._app_config,
+            checkpointer=self.checkpointer,
+            langfuse_client=self.langfuse
+        )
+        self._graph = builder.build()
+        self._graph = self._graph.with_config(config={"callbacks": [self.observability_handler]})
 
         chat_id = (await asyncio.to_thread(input, "Chat ID (default new_id): ")).strip() or "new_id"
         channel_id = (await asyncio.to_thread(input, "Channel ID (default wa): ")).strip() or "wa"
@@ -47,15 +56,6 @@ class ConsoleConversationRunner:
             or "off_hours"
         )
         user_name = (await asyncio.to_thread(input, "Nombre del usuario (default Pedro): ")).strip() or "Pedro"
-
-        builder = AgentBuilder(
-            app_config=self._app_config,
-            checkpointer=self.checkpointer,
-            langfuse_client=self.langfuse
-        )
-
-        self._graph = builder.build()
-        self._graph = self._graph.with_config(config={"callbacks": [self.observability_handler]})
 
         self._context = {
             "chat_id": chat_id,
@@ -87,4 +87,8 @@ class ConsoleConversationRunner:
         
 
 def main() -> None:
-    asyncio.run(ConsoleConversationRunner().run())
+    try:
+        asyncio.run(ConsoleConversationRunner().run())
+    except Exception as exc:
+        logging.getLogger(__name__).critical("Error fatal al iniciar la CLI: %s", exc)
+        sys.exit(1)

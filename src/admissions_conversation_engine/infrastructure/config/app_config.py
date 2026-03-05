@@ -12,7 +12,7 @@ class LanguageDetectorConfig(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     method: Literal["fasttext", "llm"] = "llm"
-    fasttext_model_path: str = "/models/lid.176.ftz"
+    fasttext_model_path: str = "models/lid.176.ftz"
 
 
 class RagVectorStoreConfig(BaseModel):

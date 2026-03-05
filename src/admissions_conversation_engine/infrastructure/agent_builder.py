@@ -57,6 +57,8 @@ class AgentBuilder:
     def build(self) -> Any:
         logger = logging.getLogger(__name__)
 
+        prompts = PromptProvider(self.langfuse_client, self.app_config.tenant).get_formatted_prompts()
+        
         guardrail_factory = LLMFactory(self.app_config.llm.guardrail)
         guardrail_factory.build().health_check()
         logger.info("Guardrail llm ready!")
@@ -67,6 +69,24 @@ class AgentBuilder:
         logger.info("React llm ready!")
         react_llm = react_factory.get_llm()
 
+        ld_config = self.app_config.language_detector
+        if ld_config.method == "llm":
+            language_detector_factory = LLMFactory(self.app_config.llm.translator)
+            language_detector_factory.build().health_check()
+            logger.info("Language detector llm ready!")
+            translator_llm = language_detector_factory.get_llm()
+            language_detector = LlmLanguageDetectorNode(
+                translator_llm,
+                prompts.language_detector,
+                self.app_config.tenant,
+            )
+        else:
+            language_detector = FasttextLanguageDetectorNode(
+                self.app_config.tenant,
+                model_path=ld_config.fasttext_model_path,
+            )
+            logger.info("Language detector local ready!")
+
         search_tool = PostgresVectorStoreTool(
             rag_config=self.app_config.rag,
         )
@@ -75,30 +95,9 @@ class AgentBuilder:
 
         llm_with_tool = react_llm.bind_tools([search_tool])
 
-        prompts = PromptProvider(self.langfuse_client, self.app_config.tenant).get_formatted_prompts()
-
         graph = StateGraph(AgentState, context_schema=ContextSchema)
         
         graph.add_node("setup", SetupChatNode())
-
-        ld_config = self.app_config.language_detector
-        if ld_config.method == "llm":
-            language_detector_factory = LLMFactory(self.app_config.llm.translator)
-            logger.info("Language detector llm ready!")
-            language_detector_factory.build().health_check()
-            translator_llm = language_detector_factory.get_llm()
-            language_detector = LlmLanguageDetectorNode(
-                translator_llm,
-                prompts.language_detector,
-                self.app_config.tenant,
-            )
-        else:
-            logger.info("Language detector local ready!")
-            language_detector = FasttextLanguageDetectorNode(
-                self.app_config.tenant,
-                model_path=ld_config.fasttext_model_path,
-            )
-
         graph.add_node("language_detector", language_detector)
         graph.add_node("guardrail", GuardrailNode(guardrail_llm, prompts.guardrail))
         graph.add_node("case_router", CaseRouterNode())
@@ -181,6 +180,8 @@ class AgentBuilder:
                 "max_retries_node": "max_retries_node",
             }
         )
+
+        logger.info("Graph ready!")
 
         return graph.compile(
             checkpointer=self.checkpointer,

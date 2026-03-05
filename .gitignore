@@ -17,3 +17,6 @@ wheels/
 
 # Claude Code local config
 .claude/
+
+# Models directory
+models/

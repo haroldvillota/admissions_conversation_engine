@@ -10,9 +10,9 @@ wheels/
 .venv
 
 # Environment
-.env
-.env-docker
+.env*
 
+# Langgraph dev server
 .langgraph_api/
 
 # Claude Code local config

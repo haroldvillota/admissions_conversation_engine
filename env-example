@@ -44,7 +44,6 @@ AUTH__JWT_EXPIRE_MINUTES="60"
 LANGUAGE_DETECTOR__METHOD="fasttext"
 
 # Required when any variable uses the from_key_vault/<secret-name> syntax
-USE_VAULT=1
 AZURE_KEY_VAULT_URL="https://<vault-name>.vault.azure.net/"
 
 #LANGGRAPH_POSTGRES_POOL_MAX_SIZE
